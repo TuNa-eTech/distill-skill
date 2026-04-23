@@ -25,4 +25,4 @@ data/blobs/*
 .idea/
 
 # claude local
-.claude/settings.local.json
+.claude/
