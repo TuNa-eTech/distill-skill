@@ -1,0 +1,32 @@
+[project]
+name = "distill"
+version = "0.1.0"
+description = "Distill MVP POC — organizational brain for AI-assisted engineering teams"
+requires-python = ">=3.10"
+dependencies = [
+    "anthropic>=0.40.0",
+    "requests>=2.32.0",
+    "pydantic>=2.9.0",
+    "python-dotenv>=1.0.0",
+    "sqlite-utils>=3.37",
+    "tenacity>=9.0.0",
+    "pyyaml>=6.0.2",
+    "tiktoken>=0.8.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.0",
+    "ruff>=0.7.0",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"

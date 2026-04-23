@@ -1,0 +1,28 @@
+# env & secrets
+.env
+.env.local
+
+# python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+
+# runtime data
+data/distill.db
+data/distill.db-journal
+data/distill.db-wal
+data/distill.db-shm
+data/blobs/*
+!data/blobs/.gitkeep
+
+# editors / os
+.DS_Store
+.vscode/
+.idea/
+
+# claude local
+.claude/settings.local.json
