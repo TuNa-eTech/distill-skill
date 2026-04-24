@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Run LLM extraction over top-scored artifacts; persist JSON extractions."""
 import argparse
 
@@ -10,9 +9,9 @@ def main() -> None:
     args = parser.parse_args()
 
     raise NotImplementedError(
-        f"TODO (Day 4): call LLM with prompts/extract.*.md on top {args.limit} "
-        f"scored artifacts for role={args.role}, validate against Extraction schema, "
-        "insert into extractions table."
+        f"TODO (Day 4): call LLM (distill_core.llm.complete) with prompts/extract.*.md "
+        f"on top {args.limit} scored artifacts for role={args.role}, validate against "
+        "Extraction schema, insert into extractions table."
     )
 
 

@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Distill MVP POC — organizational brain for AI-assisted engineering teams"
 requires-python = ">=3.10"
 dependencies = [
-    "anthropic>=0.40.0",
+    "openai>=1.50.0",
     "requests>=2.32.0",
     "pydantic>=2.9.0",
     "python-dotenv>=1.0.0",
@@ -20,6 +20,27 @@ dev = [
     "ruff>=0.7.0",
     "pre-commit>=4.0.0",
 ]
+
+[project.scripts]
+# distill_core
+distill-init-db          = "distill_core.cli:init_db"
+
+# distill_capture
+distill-ingest-gitlab    = "distill_capture.ingest_gitlab:main"
+distill-ingest-jira      = "distill_capture.ingest_jira:main"
+distill-ingest-confluence = "distill_capture.ingest_confluence:main"
+distill-link             = "distill_capture.link:main"
+
+# distill_evolve
+distill-score            = "distill_evolve.score:main"
+distill-extract          = "distill_evolve.extract:main"
+distill-cluster          = "distill_evolve.cluster:main"
+distill-synthesize       = "distill_evolve.synthesize:main"
+distill-validate         = "distill_evolve.validate:main"
+distill-trace            = "distill_evolve.trace:main"
+
+# distill_distribute
+distill-build-prompt     = "distill_distribute.build_prompt:main"
 
 [build-system]
 requires = ["setuptools>=68"]

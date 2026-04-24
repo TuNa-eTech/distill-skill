@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Link artifacts across sources (Jira key in MR title/branch, Confluence body)."""
 
 

@@ -1,5 +1,4 @@
-#!/usr/bin/env python3
-"""Interactive clustering — show extraction, prompt for cluster name, save."""
+"""Compute composite quality scores per artifact for the given role."""
 import argparse
 
 
@@ -9,8 +8,8 @@ def main() -> None:
     args = parser.parse_args()
 
     raise NotImplementedError(
-        f"TODO (Day 5): read unclustered extractions for role={args.role}, "
-        "show each, prompt for cluster name, upsert clusters + set extractions.cluster_id."
+        f"TODO (Day 3): implement composite score formula for role={args.role}, "
+        "populate scores table with score + breakdown JSON."
     )
 
 

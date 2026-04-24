@@ -1,5 +1,4 @@
-#!/usr/bin/env python3
-"""Compute composite quality scores per artifact for the given role."""
+"""Validate pack: every rule has [src: ...], module < 3000 tokens, total < 20000."""
 import argparse
 
 
@@ -9,8 +8,8 @@ def main() -> None:
     args = parser.parse_args()
 
     raise NotImplementedError(
-        f"TODO (Day 3): implement composite score formula for role={args.role}, "
-        "populate scores table with score + breakdown JSON."
+        f"TODO (Day 7): scan packs/{args.role}/v0.1/skills/*.md — verify citations, "
+        "per-module and total token budget; report pass/fail per module."
     )
 
 

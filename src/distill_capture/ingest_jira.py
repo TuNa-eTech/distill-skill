@@ -1,5 +1,4 @@
-#!/usr/bin/env python3
-"""Crawl GitLab MRs + discussions + commits in the given window (days) into SQLite."""
+"""Crawl Jira issues + changelog + comments in the given window (days) into SQLite."""
 import argparse
 
 
@@ -9,8 +8,8 @@ def main() -> None:
     args = parser.parse_args()
 
     raise NotImplementedError(
-        f"TODO (Day 1): crawl GitLab MRs for last {args.window}d, "
-        "upsert artifacts, save blobs under data/blobs/gitlab/."
+        f"TODO (Day 1): crawl Jira issues for last {args.window}d, "
+        "upsert artifacts + jira_events, save blobs under data/blobs/jira/."
     )
 
 

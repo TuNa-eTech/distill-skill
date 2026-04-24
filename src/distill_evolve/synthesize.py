@@ -1,5 +1,4 @@
-#!/usr/bin/env python3
-"""Synthesize one skill module per cluster and write packs/<role>/v0.1/skills/*.md."""
+"""Synthesize one skill module per cluster; write packs/<role>/v0.1/skills/*.md."""
 import argparse
 
 

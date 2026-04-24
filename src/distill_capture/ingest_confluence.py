@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Crawl Confluence pages in the given window (days) into SQLite (BA role)."""
 import argparse
 

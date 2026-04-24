@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Debug: given a module, dump the source artifacts/extractions it cites."""
 import argparse
 

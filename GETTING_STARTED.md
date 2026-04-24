@@ -66,14 +66,14 @@ make setup
 Verify:
 
 ```bash
-.venv/bin/python -c "import sqlite3, distill; \
-  print('distill', distill.__version__); \
+.venv/bin/python -c "import sqlite3, distill_core; \
+  print('distill_core', distill_core.__version__); \
   print('tables:', [r[0] for r in sqlite3.connect('data/distill.db') \
     .execute(\"SELECT name FROM sqlite_master WHERE type='table'\")])"
 ```
 
-Phải in ra `distill 0.1.0` và 6 tables: `artifacts, links, jira_events, scores,
-extractions, clusters`.
+Phải in ra `distill_core 0.1.0` và 6 tables: `artifacts, links, jira_events,
+scores, extractions, clusters`.
 
 ---
 
@@ -107,7 +107,7 @@ Pack final: `packs/backend-dev/v0.1/` (manifest + skills + pack.yaml).
 
 1. **Claude Code project file** — copy `manifest.md` thành `CLAUDE.md` trong
    project test, copy `skills/` vào `.claude/skills/`.
-2. **System prompt direct** — `python scripts/build_prompt.py --role backend-dev
+2. **System prompt direct** — `.venv/bin/distill-build-prompt --role backend-dev
    --task "..." > prompt.txt` → paste vào Claude/ChatGPT.
 3. **Anthropic API call** — load pack làm `system` parameter.
 
@@ -128,19 +128,26 @@ Pack final: `packs/backend-dev/v0.1/` (manifest + skills + pack.yaml).
 
 ```
 .
-├── .env                       # secrets (gitignored)
-├── pyproject.toml             # deps + project config
-├── Makefile                   # entry points
+├── .env                          # secrets (gitignored)
+├── pyproject.toml                # deps + console_scripts entry points
+├── Makefile                      # thin wrapper around console_scripts
 ├── data/
-│   ├── distill.db             # SQLite (gitignored)
-│   └── blobs/                 # raw artifact payloads (gitignored)
-├── src/distill/               # shared helpers (config, db, llm, schemas, redact)
-├── scripts/                   # pipeline entry-points
-├── prompts/                   # extract.system.md, synthesize.system.md, ...
-├── packs/<role>/v0.1/         # output skill pack
-├── validation/                # reviewer ratings, blind test, self-use log
-└── docs/                      # vision + design notes
+│   ├── distill.db                # SQLite (gitignored)
+│   └── blobs/                    # raw artifact payloads (gitignored)
+├── src/
+│   ├── distill_core/             # config, db, schemas, llm, cli (shared primitives)
+│   ├── distill_capture/          # ingest_gitlab/jira/confluence, link, redact
+│   ├── distill_evolve/           # score, extract, cluster, synthesize, validate, trace
+│   └── distill_distribute/       # build_prompt, pack loader (+ mcp_server later)
+├── prompts/                      # extract.system.md, synthesize.system.md, ...
+├── packs/<role>/v0.1/            # output skill pack
+├── validation/                   # reviewer ratings, blind test, self-use log
+└── docs/                         # vision + design notes
 ```
+
+**Layer boundaries**: capture/evolve/distribute import từ `distill_core` only —
+không cross-import giữa 3 layer cuối. Khi nào tách repo: xem
+[architecture.md §Layers](docs/architecture.md).
 
 ---
 

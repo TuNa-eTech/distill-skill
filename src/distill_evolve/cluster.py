@@ -1,5 +1,4 @@
-#!/usr/bin/env python3
-"""Validate pack: every rule has [src: ...], module < 3000 tokens, total < 20000."""
+"""Interactive clustering — show extraction, prompt for cluster name, save."""
 import argparse
 
 
@@ -9,8 +8,8 @@ def main() -> None:
     args = parser.parse_args()
 
     raise NotImplementedError(
-        f"TODO (Day 7): scan packs/{args.role}/v0.1/skills/*.md — verify citations, "
-        "per-module and total token budget; report pass/fail per module."
+        f"TODO (Day 5): read unclustered extractions for role={args.role}, "
+        "show each, prompt for cluster name, upsert clusters + set extractions.cluster_id."
     )
 
 

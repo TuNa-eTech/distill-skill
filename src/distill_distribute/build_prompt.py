@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Build a single system prompt from a pack (manifest + trigger-matched modules)."""
 import argparse
 
