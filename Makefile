@@ -1,8 +1,19 @@
-ROLE ?= backend-dev
-WINDOW ?= 90
+ROLE ?= mobile-dev
+SINCE ?= 2026-01-01
+UNTIL ?= $(shell python -c "from datetime import date; cutoff = date(2026, 12, 31); today = date.today(); print((today if today < cutoff else cutoff).isoformat())")
+WINDOW ?= $(shell python -c "from datetime import date; start = date(2026, 1, 1); cutoff = date(2026, 12, 31); end = date.today(); end = end if end < cutoff else cutoff; print(max(1, (end - start).days + 1))")
 BIN = .venv/bin
 
 .PHONY: setup init-db ingest link score extract cluster synthesize validate all trace clean
+
+define RUN_INGEST
+	@if $(BIN)/$(1) --help 2>&1 | grep -q -- "--since"; then \
+		$(BIN)/$(1) --since $(SINCE) --until $(UNTIL); \
+	else \
+		echo "[ops] $(1) still uses legacy --window $(WINDOW) fallback for 2026-local ingest."; \
+		$(BIN)/$(1) --window $(WINDOW); \
+	fi
+endef
 
 setup:
 	python -m venv .venv
@@ -14,9 +25,9 @@ init-db:
 	$(BIN)/distill-init-db
 
 ingest:
-	$(BIN)/distill-ingest-gitlab --window $(WINDOW)
-	$(BIN)/distill-ingest-jira --window $(WINDOW)
-	$(BIN)/distill-ingest-confluence --window $(WINDOW)
+	$(call RUN_INGEST,distill-ingest-gitlab)
+	$(call RUN_INGEST,distill-ingest-jira)
+	$(call RUN_INGEST,distill-ingest-confluence)
 
 link:
 	$(BIN)/distill-link

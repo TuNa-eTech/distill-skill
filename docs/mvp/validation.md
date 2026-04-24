@@ -21,7 +21,7 @@ không cần biết "team-wide adoption sẽ ra sao" (đó là việc của Phas
 
 ### Setup
 
-- Mời **2 senior** trong role đó (senior dev nếu pack là dev, lead BA nếu là BA)
+- Mời **2 senior** trong role đó (staff/principal mobile dev nếu pack là `mobile-dev`, lead BA nếu là BA)
 - Mỗi reviewer dành 30 phút đọc qua: manifest + 3–5 modules
 - Cho họ rubric (bên dưới), tránh gut-feel rating
 
@@ -59,7 +59,7 @@ biết cái nào là cái nào?"
 ### Setup
 
 1. Chọn **5 task realistic** từ backlog (3 cũ đã done + 2 sắp làm)
-   - Dev: "implement endpoint X", "viết test cho module Y", "review MR Z"
+   - Mobile Dev: "implement screen X", "viết widget/integration test cho flow Y", "review MR Z"
    - BA: "viết spec cho feature X", "draft AC cho story Y", "viết retro X"
 
 2. Cho mỗi task, generate **2 outputs**:
@@ -112,8 +112,8 @@ Pass nếu **win_rate ≥ 60%** (clear majority, không phải just-better-than-
 
 ```markdown
 ## Task 1 — 2026-04-XX
-**Mô tả**: implement /api/orders/refund endpoint
-**Pack modules loaded**: api-design.md, error-handling.md
+**Mô tả**: implement payment schedule edit flow trong Flutter app
+**Pack modules loaded**: state-management.md, navigation.md
 **Verdict**: HELPED | NEUTRAL | HURT
 **Vì sao**: [1–2 dòng]
 **Pattern dùng được**: [list]

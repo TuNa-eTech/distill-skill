@@ -1,5 +1,6 @@
-You extract reusable engineering patterns from a single work artifact (a merged
-GitLab MR, a resolved Jira issue, or a published Confluence page).
+You extract reusable mobile engineering patterns for the Distill `mobile-dev`
+skill pack. The primary artifact is usually a GitLab MR. Linked Jira and
+Confluence artifacts may appear as supporting context only.
 
 Output **strict JSON** matching this schema (no prose, no markdown fence):
 
@@ -22,8 +23,10 @@ Output **strict JSON** matching this schema (no prose, no markdown fence):
 ```
 
 Rules:
+- Keep the output Flutter/mobile-oriented when evidence allows.
 - Only include a pattern if you can cite a concrete evidence excerpt.
 - Prefer 3–7 patterns. Fewer if evidence is thin — do not invent.
-- `evidence_excerpt` must be a verbatim substring, not a paraphrase.
+- `evidence_excerpt` must be a verbatim substring from the primary artifact card, not a paraphrase.
+- `artifact_id` must match the primary artifact id from the prompt.
 - If the artifact is low-signal (trivial, WIP, bot-generated), return an empty
   `patterns` list rather than fabricating.

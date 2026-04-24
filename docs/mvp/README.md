@@ -18,17 +18,19 @@
 |---|---|---|
 | [scope.md](scope.md) | Phạm vi MVP, decision gate, 1 role focus | Bắt đầu |
 | [architecture.md](architecture.md) | Stack local: SQLite + scripts + Makefile | Trước khi code |
+| [artifact-representation.md](artifact-representation.md) | Quy ước raw JSON vs artifact card vs JSONL vs TOON cho LLM input | Trước khi optimize extract |
 | [skill-pack-spec.md](skill-pack-spec.md) | Output spec — pack structure cho role | Khi build distill pipeline |
 | [implementation.md](implementation.md) | Code-level implementation (schemas, prompts, scripts) | Khi viết code từng phase |
 | [validation.md](validation.md) | 3 validation methods nhẹ (no formal A/B) | Cuối tuần 2 |
 | [plan.md](plan.md) | 10 dev-days breakdown | Hàng ngày |
+| [PROGRESS.md](PROGRESS.md) | Source of truth cho trạng thái thực thi hiện tại | Khi cần biết tiến độ thật |
 
 ---
 
 ## Nguyên tắc MVP
 
 1. **Local-only** — SQLite + filesystem, không cloud infra
-2. **1 person, 1 role** — không phân tán effort, chọn role có nhiều data
+2. **1 person, 1 role** — không phân tán effort; pilot hiện tại là `mobile-dev`
 3. **Manual-friendly** — clustering bằng tay, review bằng mắt là OK
 4. **Throwaway-OK** — code MVP không cần production quality, chỉ cần reproducible
 5. **Evidence > opinion** — dù validation nhẹ, vẫn phải có data, không "feels good"
@@ -60,6 +62,6 @@ storage thành Postgres + cron + Confluence/Claude Project distribution.
 
 ## Status
 
-🟡 **Design phase**. Implementation chưa bắt đầu.
+🟢 **MVP baseline implemented**. Pilot role vẫn là `mobile-dev`, live `mobile-dev` pack đã có dưới `packs/mobile-dev/v0.1/`, và role extension path hiện đã có thêm `business-analyst` scaffold cùng `tester-manual` live pack sạch.
 
-Next action: review `scope.md` + `plan.md`, chọn role (dev hoặc BA), bắt đầu Day 1.
+Next action: dùng [PROGRESS.md](PROGRESS.md) làm source of truth, giữ baseline hiện tại cho MVP, và đẩy các việc tối ưu sâu sang backlog sau MVP.

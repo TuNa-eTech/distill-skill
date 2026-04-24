@@ -26,3 +26,5 @@ data/blobs/*
 
 # claude local
 .claude/
+.gitnexus
+packs/*/*

@@ -182,7 +182,7 @@ def redact(text: str) -> str:
 
 **Test trước khi dùng**:
 ```python
-# tests/test_redact.py
+# tests/capture/test_redact.py
 def test_email():
     assert "[EMAIL]" in redact("Contact alice@company.com")
 
@@ -280,13 +280,13 @@ def upsert_issue_and_events(conn, issue: dict, blob_path: str): ...
 
 ### `scripts/ingest_confluence.py`
 
-**Key decisions** (chỉ chạy nếu role = BA):
+**Key decisions** (reference path cho BA; không thuộc pilot `mobile-dev` hiện tại):
 - Filter: `space=PRODUCT AND (label=spec OR title ~ "PRD:")`
 - Pagination với `start` + `limit=50`
 - Body convert: `body.storage` (XHTML) → markdown bằng `html2text` hoặc keep XHTML
 
 **Acceptance**:
-- [ ] ≥ 20 pages nếu role = BA
+- [ ] ≥ 20 pages nếu sau này bật BA path
 - [ ] Version count metadata được lưu (cho scope_change calculation)
 
 ---
@@ -327,7 +327,7 @@ Triển khai composite formula từ [validation.md (cũ)](#) — được merged
 **Functions**:
 
 ```python
-def score_dev_mr(conn, artifact_id: int) -> tuple[float, dict]:
+def score_mobile_mr(conn, artifact_id: int) -> tuple[float, dict]:
     """Returns (score, breakdown_dict)."""
     breakdown = {}
 
@@ -351,8 +351,8 @@ def main():
     parser.add_argument("--role", required=True)
     args = parser.parse_args()
 
-    scorer = score_dev_mr if args.role == 'backend-dev' else score_ba_spec
-    kind = 'gitlab_mr' if args.role == 'backend-dev' else 'confluence_page'
+    scorer = score_mobile_mr if args.role == 'mobile-dev' else score_ba_spec
+    kind = 'gitlab_mr' if args.role == 'mobile-dev' else 'confluence_page'
 
     with conn() as c:
         for art_id in get_artifact_ids(c, kind):
@@ -679,7 +679,7 @@ def build_pack(role: str, version: str = "v0.1"):
 Nguồn input cho hard rules:
 - Aggregated review comments (group bằng tay từ top MRs)
 - Retro action items từ Confluence
-- Hỏi senior dev/BA "rule nào team luôn theo?"
+- Hỏi senior mobile dev / lead BA "rule nào team luôn theo?"
 
 **Acceptance**:
 - [ ] `packs/{role}/v0.1/` có: `manifest.md`, `skills/*.md`, `pack.yaml`
@@ -711,7 +711,7 @@ if __name__ == "__main__":
 
 Usage:
 ```bash
-python scripts/build_prompt.py backend-dev "implement /api/users/{id}/orders endpoint"
+python scripts/build_prompt.py mobile-dev "implement payment schedule edit flow in Flutter"
 # → paste output vào Claude/ChatGPT
 ```
 
@@ -842,9 +842,13 @@ Chỉ test các thứ critical, đừng phình:
 
 ```
 tests/
-├── test_redact.py        # 5–10 cases với golden corpus
-├── test_validate.py      # citation regex, size budget
-└── test_score.py         # 3–4 sample artifacts → expected score
+├── capture/
+│   └── test_redact.py        # 5–10 cases với golden corpus
+├── evolve/
+│   ├── test_validate.py      # citation regex, size budget
+│   └── test_score.py         # 3–4 sample artifacts → expected score
+└── integration/
+    └── test_pipeline_smoke.py
 ```
 
 `make test` chạy `pytest tests/`. Chạy CI optional ở MVP.
@@ -863,8 +867,8 @@ tests/
 
 Pipeline được tuyên bố implementation-complete khi:
 
-- [ ] `git clone <repo> && make setup && cp .env.example .env && <fill tokens> && make all ROLE=backend-dev` chạy end-to-end ok trên laptop sạch
-- [ ] Output: `packs/backend-dev/v0.1/` với manifest + 3–5 modules + pack.yaml
+- [ ] `git clone <repo> && make setup && cp .env.example .env && <fill tokens> && make all ROLE=mobile-dev` chạy end-to-end ok trên laptop sạch
+- [ ] Output: `packs/mobile-dev/v0.1/` với manifest + 3–5 modules + pack.yaml
 - [ ] Mọi module pass `make validate`
 - [ ] `make test` xanh
 - [ ] LLM total cost ≤ $100
@@ -890,7 +894,7 @@ Sau đó move sang validation phase (Day 8–10) theo [plan.md](plan.md).
 | A | `scripts/init_db.py` | ⬜ |
 | B | `scripts/ingest_gitlab.py` | ⬜ |
 | B | `scripts/ingest_jira.py` | ⬜ |
-| B | `scripts/ingest_confluence.py` (if BA) | ⬜ |
+| B | `scripts/ingest_confluence.py` (optional future BA path) | ⬜ |
 | C | `scripts/link.py` | ⬜ |
 | C | `scripts/score.py` | ⬜ |
 | D | `prompts/extract.system.md` | ⬜ |
@@ -907,8 +911,8 @@ Sau đó move sang validation phase (Day 8–10) theo [plan.md](plan.md).
 | G | `scripts/blind_test_gen.py` | ⬜ |
 | G | `scripts/compile_validation_report.py` | ⬜ |
 | G | `validation/*` templates | ⬜ |
-| Tests | `tests/test_redact.py` | ⬜ |
-| Tests | `tests/test_validate.py` | ⬜ |
-| Tests | `tests/test_score.py` | ⬜ |
+| Tests | `tests/capture/test_redact.py` | ⬜ |
+| Tests | `tests/evolve/test_validate.py` | ⬜ |
+| Tests | `tests/evolve/test_score.py` | ⬜ |
 
 **Tổng**: ~25 files, ~1500–2500 lines Python, ~200 lines prompts/SQL.

@@ -231,14 +231,6 @@ Mỗi open question có:
 
 ## Organization / Rollout
 
-### OQ-50 — Phase 1 pilot role 🔴
-**Question**: Role đầu tiên cho pilot là gì? Dev là default nhưng không stress-test multi-role design.
-**Why it matters**: Role nào pilot quyết định những gì ta học được
-**Blocking**: Phase 1 kick-off
-**Current hypothesis**: Dev cho Phase 1 (validate pipeline). Role thứ 2 là Tester (validate multi-role design).
-**How to answer**: Decision trong team
-**Source**: [non-dev-signals.md](non-dev-signals.md)
-
 ### OQ-51 — Who owns pack quality 🟡
 **Question**: Human review loop cần người review. Ai? Manager? Senior trong role? Dedicated curator?
 **Why it matters**: Không có owner → pack quality rơi
@@ -267,7 +259,7 @@ Mỗi open question có:
 
 ## Câu hỏi phải trả lời trước Phase 1 (🔴 P0)
 
-Tóm tắt: 5 câu hỏi không thể ship Phase 1 mà chưa trả lời.
+Tóm tắt: 4 câu hỏi không thể ship Phase 1 mà chưa trả lời.
 
 | ID | Question | Current hypothesis |
 |---|---|---|
@@ -275,8 +267,6 @@ Tóm tắt: 5 câu hỏi không thể ship Phase 1 mà chưa trả lời.
 | OQ-11 | Success measurement | Onboarding time + PR cycle + survey |
 | OQ-20 | Non-dev signal sufficiency (cho role thứ 2) | Test first on Tester role |
 | OQ-30 | Redaction completeness | Pluggable, fail-closed |
-| OQ-50 | Phase 1 pilot role | Dev primary, Tester paper-spec |
-
 ---
 
 ## Câu hỏi phải trả lời trước Phase 2 (🟡 P1)
@@ -288,6 +278,15 @@ Tóm tắt: 5 câu hỏi không thể ship Phase 1 mà chưa trả lời.
 ## Câu hỏi có thể defer (🟢 P2)
 
 OQ-02, OQ-06, OQ-12, OQ-24, OQ-42 — can revisit sau khi có dữ liệu thực.
+
+---
+
+## Resolved
+
+### OQ-50 — Phase 1 pilot role
+**Resolution**: Phase 1 / MVP pilot role được chốt là `mobile-dev`. `business-analyst` giữ ở mức paper-spec/reference cho phase sau.
+**Resolved on**: 2026-04-24
+**Source**: team decision
 
 ---
 

@@ -1,7 +1,8 @@
-# Skill Pack Spec — Backend Dev + Business Analyst
+# Skill Pack Spec — Mobile Dev + Business Analyst + Tester Manual
 
 > Concrete shape của pack output. Đây là cái pipeline phải đạt sau Day 7 MVP.
-> MVP làm 1 role (Dev *hoặc* BA), nhưng spec dưới cover cả 2 để tham khảo.
+> Pilot hiện tại là `mobile-dev`; BA và `tester-manual` là role extension path
+> đã có runtime support, nhưng chưa phải pilot scope chính.
 
 ---
 
@@ -21,7 +22,7 @@ retrieval. Tất cả vào Phase 2.
 ### `pack.yaml`
 
 ```yaml
-role: backend-dev | business-analyst
+role: mobile-dev | business-analyst | tester-manual
 version: 2026.04.1                          # YYYY.MM.N
 generated_at: 2026-04-22T08:22:00Z
 source_window: 2026-01-22..2026-04-22
@@ -32,26 +33,26 @@ quality_signals:
   filtered_out: 185
   modules_generated: 5
 checksum: sha256:9a3b7c...
-approved_by: alice (senior-dev), bob (lead-ba)
+approved_by: alice (staff-mobile), bob (lead-ba)
 approved_at: 2026-04-23T10:00:00Z
 llm_model: claude-sonnet-4-7-20251022       # pin để reproducible
 ```
 
 ---
 
-## Backend Dev pack
+## Mobile Dev pack
 
 ### Skill modules (target 4–6 cho MVP)
 
 | Module | Trigger (regex/path) | Source artifacts |
 |---|---|---|
-| `api-design.md` | `**/handlers/**`, `**/routes/**`, `openapi.yaml` | MR diffs trong path này |
-| `db-migration.md` | `migrations/**`, `schema.sql` | MR + revert history |
-| `testing.md` | `**/*_test.go`, `**/test_*.py` | Test additions trong merged MRs |
+| `state-management.md` | `lib/**/bloc/**`, `lib/**/cubit/**`, `riverpod`, `provider` | MR diffs trong state layer |
+| `navigation.md` | `lib/**/routes/**`, `go_router`, `navigator` | Screen/navigation MRs |
+| `widget-testing.md` | `test/**`, `integration_test/**`, `golden` | Test additions trong merged MRs |
 | `code-review-conventions.md` | luôn load | Review comments aggregated |
-| `error-handling.md` | path có `errors.go`, `exceptions.py` | MR diffs + review feedback |
+| `platform-integration.md` | `android/`, `ios/`, plugin/channel keywords | Native/plugin MRs + review feedback |
 
-### Module template (Dev)
+### Module template (Mobile Dev)
 
 ```markdown
 # <Module name>
@@ -87,28 +88,28 @@ window 2026-01-15..2026-04-15, 11 contributors.
 ### Manifest (Dev) — skeleton
 
 ```markdown
-# Backend Dev — Skill Pack Manifest (v2026.04.1)
+# Mobile Dev — Skill Pack Manifest (v2026.04.1)
 
-You are pairing with a backend engineer on team <X>. Always follow hard rules.
+You are pairing with a mobile engineer on team <X>. Always follow hard rules.
 Load skill modules when triggers match.
 
 ## Hard rules (always apply)
-- Mọi DB migration phải có rollback plan inline
-- Mọi endpoint mới phải có Pact contract test
-- Không log raw request body (PII risk)
-- Error response phải dùng envelope `{code, message, request_id}`
-- Concurrency: dùng `lib/sync` helpers, không spawn raw goroutines/threads
+- State thay đổi phải đi qua single source of truth, không duplicate state giữa widget và controller
+- Async UI phải biểu diễn đủ loading, success, empty, error
+- Luồng điều hướng mới phải có back behavior và deep-link expectation rõ ràng
+- Không gọi plugin/platform channel mà không có fallback hoặc error UX
+- Flow người dùng critical phải có widget/integration test trước merge
 - <... 5–10 rules từ aggregated review comments>
 
 ## Skill modules
 
 | Module | Load when |
 |---|---|
-| skills/api-design.md | files match `handlers/**` or prompt mentions endpoint/route/API |
-| skills/db-migration.md | files match `migrations/**` or prompt mentions migration/schema |
-| skills/testing.md | files match `**/*_test.*` or prompt mentions test/fixture |
+| skills/state-management.md | files match `bloc/**`, `cubit/**`, `riverpod/**`, `provider/**` or prompt mentions state/event |
+| skills/navigation.md | files match `routes/**` or prompt mentions screen/flow/navigation |
+| skills/widget-testing.md | files match `test/**`, `integration_test/**` or prompt mentions widget/golden/integration test |
 | skills/code-review-conventions.md | always |
-| skills/error-handling.md | files contain error/exception patterns |
+| skills/platform-integration.md | files touch `android/`, `ios/`, plugins, permissions, channels |
 ```
 
 ---
@@ -222,6 +223,64 @@ acceptance criteria. Always follow hard rules. Load modules per trigger.
 | skills/discovery.md | prompt mentions research/interview/discovery |
 | skills/prioritization.md | prompt mentions RICE/priority/roadmap |
 | skills/stakeholder-comms.md | prompt mentions status/update/escalation |
+```
+
+---
+
+## Tester Manual pack
+
+### Skill modules (target 3 cho extension path)
+
+| Module | Trigger | Source artifacts |
+|---|---|---|
+| `bug-report-quality.md` | prompt mentions defect/bug/actual vs expected/environment | Jira bug tickets |
+| `regression-strategy.md` | prompt mentions regression/release/retest/checklist | Jira bugs + release-related stories/tasks |
+| `test-case-design.md` | prompt mentions scenario/boundary/edge case/test case | Jira stories/tasks với AC hoặc coverage notes |
+
+### Module template (Tester Manual)
+
+Tester modules ưu tiên **observable behavior + checklist + defect communication**:
+
+```markdown
+# Bug Report Quality
+
+## When this applies
+Khi viết defect ticket mới hoặc refine bug đã được reopen / bounce lại.
+
+## Rules
+- Luôn có Steps to reproduce, Actual result, Expected result, Environment [src: QA-101, QA-122]
+- Nếu bug chỉ xảy ra ở một build/device/version, ghi rõ ngay trong summary hoặc bullet đầu tiên [src: QA-101, QA-145]
+
+## Templates
+- Dùng skeleton: Preconditions, Steps, Actual, Expected, Environment, Severity, Attachments [src: QA-101, QA-122]
+
+## Pitfalls
+- ❌ Chỉ ghi "không chạy" mà không có đường đi tái hiện [src: QA-156, QA-199]
+- ❌ Gộp nhiều lỗi không cùng root cause vào một ticket [src: QA-145, QA-188]
+```
+
+### Manifest (Tester Manual) — skeleton
+
+```markdown
+# Tester Manual — Skill Pack Manifest (v2026.04.1)
+
+You are pairing with a manual tester. Help write clearer bug reports,
+regression scope, and test cases. Always follow hard rules. Load modules per trigger.
+
+## Hard rules (always apply)
+- Bug report phải có Steps, Actual, Expected, và Environment nếu có dependency runtime
+- Regression checklist phải cover main flow, failure path, và edge case có risk cao
+- Không close bug nếu chưa xác nhận exact build / environment đã retest
+- Test case phải mô tả observable behavior, không chỉ lặp lại tên field hoặc button
+- Nếu issue bị reopen, bổ sung rõ gap coverage hoặc mismatch environment trước khi reassign
+
+## Skill modules
+
+| Module | Load when |
+|---|---|
+| skills/bug-report-quality.md | prompt mentions bug/defect/actual/expected/environment |
+| skills/regression-strategy.md | prompt mentions regression/retest/release/smoke |
+| skills/test-case-design.md | prompt mentions scenario/test case/edge case/boundary |
 ```
 
 ---

@@ -1,4 +1,5 @@
 import os
+from datetime import date
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -10,6 +11,7 @@ DB_PATH = DATA_DIR / "distill.db"
 PROMPTS_DIR = ROOT / "prompts"
 PACKS_DIR = ROOT / "packs"
 VALIDATION_DIR = ROOT / "validation"
+DEFAULT_INGEST_SINCE = "2026-01-01"
 
 load_dotenv(ROOT / ".env")
 
@@ -31,3 +33,11 @@ def llm_model() -> str:
     if provider == "anthropic":
         return env("ANTHROPIC_MODEL", "claude-sonnet-4-5") or "claude-sonnet-4-5"
     return env("GPT_MODEL", "gpt-4o") or "gpt-4o"
+
+
+def default_ingest_since() -> str:
+    return env("INGEST_SINCE", DEFAULT_INGEST_SINCE) or DEFAULT_INGEST_SINCE
+
+
+def default_ingest_until() -> str:
+    return env("INGEST_UNTIL", date.today().isoformat()) or date.today().isoformat()

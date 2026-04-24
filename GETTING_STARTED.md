@@ -15,9 +15,9 @@ assistant. POC này validate hypothesis cốt lõi:
 > issue, Confluence page) và tổng hợp thành **role-scoped skill pack** mà AI
 > assistant có thể inject để nâng chất lượng output.
 
-POC chạy 1 lần (không phải production service) trên 1 role (`backend-dev` hoặc
-`business-analyst`) với window 90 ngày. Output là 1 skill pack
-`packs/<role>/v0.1/` + validation report.
+POC hiện chốt pilot trên 1 role duy nhất là `mobile-dev` với window 90 ngày.
+`business-analyst` giữ ở mức reference docs cho phase sau. Output là 1 skill
+pack `packs/mobile-dev/v0.1/` + validation report.
 
 ---
 
@@ -80,8 +80,8 @@ scores, extractions, clusters`.
 ## Run pipeline end-to-end
 
 ```bash
-# Chạy toàn bộ cho role backend-dev, window 90 ngày
-make all ROLE=backend-dev WINDOW=90
+# Chạy toàn bộ cho role mobile-dev, window 90 ngày
+make all ROLE=mobile-dev WINDOW=90
 ```
 
 Hoặc từng bước (debug dễ hơn):
@@ -90,13 +90,13 @@ Hoặc từng bước (debug dễ hơn):
 |---|---|---|
 | 1 | `make ingest WINDOW=90` | Artifacts crawled vào `data/distill.db` + `data/blobs/` |
 | 2 | `make link` | Cross-source links populated |
-| 3 | `make score ROLE=backend-dev` | Composite score per artifact |
-| 4 | `make extract ROLE=backend-dev` | LLM extractions (top-scored only) |
-| 5 | `make cluster ROLE=backend-dev` | **Interactive** — gõ tên cluster cho mỗi extraction |
-| 6 | `make synthesize ROLE=backend-dev` | Skill modules → `packs/backend-dev/v0.1/skills/*.md` |
-| 7 | `make validate ROLE=backend-dev` | Citation + size budget check |
+| 3 | `make score ROLE=mobile-dev` | Composite score per artifact |
+| 4 | `make extract ROLE=mobile-dev` | LLM extractions (top-scored only) |
+| 5 | `make cluster ROLE=mobile-dev` | **Interactive** — gõ tên cluster cho mỗi extraction |
+| 6 | `make synthesize ROLE=mobile-dev` | Skill modules → `packs/mobile-dev/v0.1/skills/*.md` |
+| 7 | `make validate ROLE=mobile-dev` | Citation + size budget check |
 
-Pack final: `packs/backend-dev/v0.1/` (manifest + skills + pack.yaml).
+Pack final: `packs/mobile-dev/v0.1/` (manifest + skills + pack.yaml).
 
 ---
 
@@ -107,8 +107,9 @@ Pack final: `packs/backend-dev/v0.1/` (manifest + skills + pack.yaml).
 
 1. **Claude Code project file** — copy `manifest.md` thành `CLAUDE.md` trong
    project test, copy `skills/` vào `.claude/skills/`.
-2. **System prompt direct** — `.venv/bin/distill-build-prompt --role backend-dev
-   --task "..." > prompt.txt` → paste vào Claude/ChatGPT.
+2. **System prompt direct** — `.venv/bin/distill-build-prompt --role mobile-dev
+   --task "implement payment schedule edit flow in Flutter" > prompt.txt` →
+   paste vào Claude/ChatGPT.
 3. **Anthropic API call** — load pack làm `system` parameter.
 
 ---
@@ -117,9 +118,9 @@ Pack final: `packs/backend-dev/v0.1/` (manifest + skills + pack.yaml).
 
 | Vấn đề | Lệnh |
 |---|---|
-| Module có claim lạ — từ artifact nào? | `make trace MODULE=packs/backend-dev/v0.1/skills/api-design.md` |
+| Module có claim lạ — từ artifact nào? | `make trace MODULE=packs/mobile-dev/v0.1/skills/state-management.md` |
 | Score distribution | `sqlite3 data/distill.db "SELECT role, COUNT(*), AVG(score) FROM scores GROUP BY role"` |
-| Top artifacts theo score | `sqlite3 data/distill.db "SELECT a.kind, a.external_id, s.score FROM artifacts a JOIN scores s ON s.artifact_id=a.id WHERE s.role='backend-dev' ORDER BY s.score DESC LIMIT 20"` |
+| Top artifacts theo score | `sqlite3 data/distill.db "SELECT a.kind, a.external_id, s.score FROM artifacts a JOIN scores s ON s.artifact_id=a.id WHERE s.role='mobile-dev' ORDER BY s.score DESC LIMIT 20"` |
 | Reset toàn bộ data | `make clean && make init-db` |
 
 ---

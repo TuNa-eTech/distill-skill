@@ -10,7 +10,7 @@
 | # | Task | Deliverable |
 |---|---|---|
 | 0.1 | Verify A1–A5 (xem [scope.md](scope.md#assumption-cần-verify-day-1)) | Tất cả token API work |
-| 0.2 | Chọn role (Dev hoặc BA) | Decision noted |
+| 0.2 | Chốt pilot role = `mobile-dev` | Decision noted |
 | 0.3 | `git init` repo MVP, `.env`, `Makefile`, folder structure | Layout giống [architecture.md](architecture.md#folder-layout) |
 | 0.4 | `pip install` deps + `python scripts/init_db.py` | SQLite schema created |
 
@@ -32,7 +32,7 @@
 
 | Time | Task |
 |---|---|
-| AM | `ingest_confluence.py` (nếu role là BA) |
+| AM | `ingest_confluence.py` cho ADR/spec/retro pages liên quan mobile work |
 | PM | `link.py` — match Jira key trong MR title/branch + Confluence body |
 | EOD | Spot-check 20 random links → accuracy ≥ 80% |
 
@@ -40,7 +40,7 @@
 
 | Time | Task |
 |---|---|
-| AM | Implement composite score formula cho role chọn (xem [validation.md](validation.md) cũ — đã merge vào breakdown logic dưới) |
+| AM | Implement composite score formula cho `mobile-dev` (xem [validation.md](validation.md) cũ — đã merge vào breakdown logic dưới) |
 | PM | Run `score.py`, inspect distribution, tune threshold để top quartile có 30–60 artifacts |
 | EOD | `SELECT * FROM artifacts a JOIN scores s ON s.artifact_id=a.id WHERE s.score >= threshold ORDER BY score DESC LIMIT 30` → đọc tay 5–10 cái → confirm "đây là MR/spec tốt" |
 
@@ -56,7 +56,7 @@
 
 | Time | Task |
 |---|---|
-| AM | Đọc tất cả extractions, list theme nổi (api-design, db-migration, error-handling, ...) |
+| AM | Đọc tất cả extractions, list theme nổi (state-management, navigation, testing, offline-data, platform-integration, ...) |
 | PM | `cluster.py` — interactive script: hiển thị extraction, gõ cluster name → save vào `clusters` table |
 | EOD | 4–6 clusters identified, mỗi cluster có ≥ 5 extractions |
 
@@ -155,8 +155,8 @@ Plan này giả định "happy path". Nếu chậm:
 | Slip | Cắt |
 |---|---|
 | Day 1-2 ingest chậm | Giảm window 90→60d |
-| Day 3 score nhiều noise | Skip BA hoặc Dev (chọn 1) |
-| Day 5 cluster không ra | Mở rộng window, hoặc đổi role |
+| Day 3 score nhiều noise | Giảm scope artifact nhưng vẫn giữ `mobile-dev` là role duy nhất |
+| Day 5 cluster không ra | Mở rộng window hoặc đổi pilot repo, nhưng vẫn giữ `mobile-dev` |
 | Day 7 module fail validation lặp | Hand-edit module thay vì auto-regenerate |
 | Day 8-10 reviewer busy | Giảm V1 còn 1 reviewer; V2 còn 2 judges |
 

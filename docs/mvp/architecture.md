@@ -40,12 +40,12 @@
 │   └── synthesize.system.md
 │
 ├── packs/
-│   └── backend-dev/
+│   └── mobile-dev/
 │       └── v0.1/
 │           ├── manifest.md
 │           ├── skills/
-│           │   ├── api-design.md
-│           │   ├── db-migration.md
+│           │   ├── state-management.md
+│           │   ├── widget-testing.md
 │           │   └── ...
 │           └── pack.yaml
 │
@@ -115,7 +115,7 @@ CREATE TABLE jira_events (
 -- composite quality scores
 CREATE TABLE scores (
   artifact_id  INTEGER REFERENCES artifacts(id),
-  role         TEXT,                    -- dev | ba
+  role         TEXT,                    -- mobile-dev | business-analyst | tester-manual
   score        REAL,
   breakdown    TEXT,                    -- JSON per-signal contribution
   scored_at    TEXT DEFAULT (datetime('now')),
@@ -149,7 +149,7 @@ Tổng 6 tables. Tất cả trong 1 file `data/distill.db`.
 ## Pipeline — chạy bằng Makefile
 
 ```makefile
-ROLE ?= backend-dev
+ROLE ?= mobile-dev
 WINDOW ?= 90
 
 .PHONY: setup ingest link score extract cluster synthesize validate all
@@ -196,7 +196,7 @@ clean:
 **Run end-to-end**:
 ```bash
 make setup
-make all ROLE=backend-dev WINDOW=90
+make all ROLE=mobile-dev WINDOW=90
 ```
 
 Mọi step idempotent — re-run được không corrupt state (UPSERT pattern).
@@ -254,8 +254,8 @@ MVP không sync Confluence/Claude Project. Cách dùng pack đơn giản nhất:
 
 ```bash
 # Symlink hoặc copy pack vào project
-cp packs/backend-dev/v0.1/manifest.md /path/to/test-project/CLAUDE.md
-cp -r packs/backend-dev/v0.1/skills /path/to/test-project/.claude/skills/
+cp packs/mobile-dev/v0.1/manifest.md /path/to/test-project/CLAUDE.md
+cp -r packs/mobile-dev/v0.1/skills /path/to/test-project/.claude/skills/
 ```
 
 Claude Code đọc `CLAUDE.md` mỗi session → manifest tự inject. Skills load qua
@@ -265,8 +265,8 @@ trigger hook (nếu cần test trigger).
 
 ```bash
 .venv/bin/python scripts/build_prompt.py \
-  --role backend-dev \
-  --task "implement /api/users/{id}/orders endpoint" \
+  --role mobile-dev \
+  --task "implement payment schedule edit flow in Flutter" \
   > prompt.txt
 
 # Paste prompt.txt vào Claude/ChatGPT
@@ -280,7 +280,7 @@ hoàn chỉnh.
 ```python
 client.messages.create(
     model="claude-sonnet-4-7",
-    system=load_pack("backend-dev/v0.1") + base_system,
+    system=load_pack("mobile-dev/v0.1") + base_system,
     messages=[{"role": "user", "content": task}]
 )
 ```
@@ -368,8 +368,8 @@ Cuối MVP, người khác có thể replicate bằng:
 git clone <poc-repo>
 cp .env.example .env  # fill in tokens
 make setup
-make all ROLE=backend-dev WINDOW=90
-# → packs/backend-dev/v0.1/ identical (modulo LLM non-determinism)
+make all ROLE=mobile-dev WINDOW=90
+# → packs/mobile-dev/v0.1/ identical (modulo LLM non-determinism)
 ```
 
 LLM call dùng `temperature=0` + pin model version để giảm variance. Output

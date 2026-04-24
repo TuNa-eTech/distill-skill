@@ -33,7 +33,7 @@ def _complete_openai(
 ) -> str:
     resp = _openai_client().chat.completions.create(
         model=model or llm_model(),
-        max_tokens=max_tokens,
+        max_completion_tokens=max_tokens,
         temperature=temperature,
         messages=[
             {"role": "system", "content": system},
