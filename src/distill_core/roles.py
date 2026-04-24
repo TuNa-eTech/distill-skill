@@ -1,4 +1,5 @@
 """Role registry for prompt loading and role-specific pack generation."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -108,7 +109,14 @@ ROLE_CONFIGS: dict[str, RoleConfig] = {
                 "when",
                 "then",
             ),
-            "discovery": ("discovery", "research", "interview", "analysis", "assumption", "question"),
+            "discovery": (
+                "discovery",
+                "research",
+                "interview",
+                "analysis",
+                "assumption",
+                "question",
+            ),
             "stakeholder-comms": (
                 "stakeholder",
                 "status",

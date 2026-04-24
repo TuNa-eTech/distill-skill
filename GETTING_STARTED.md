@@ -34,6 +34,9 @@ Stack: **Python 3.10+ · SQLite · Anthropic Claude · Makefile**. Không cron,
 không service nền, không cloud. Layout chi tiết xem
 [architecture.md](docs/mvp/architecture.md#folder-layout).
 
+Dashboard web shell hiện nằm ở `apps/web/`, dùng **React + TypeScript + Vite +
+Yarn** cho control-plane UI nội bộ.
+
 ---
 
 ## Prerequisites
@@ -74,6 +77,27 @@ Verify:
 
 Phải in ra `distill_core 0.1.0` và 6 tables: `artifacts, links, jira_events,
 scores, extractions, clusters`.
+
+## Run dashboard web shell
+
+```bash
+make web-install
+make web-dev
+```
+
+Hoặc chạy trực tiếp:
+
+```bash
+cd apps/web
+yarn install
+yarn dev
+```
+
+Build production:
+
+```bash
+make web-build
+```
 
 ---
 
@@ -132,6 +156,8 @@ Pack final: `packs/mobile-dev/v0.1/` (manifest + skills + pack.yaml).
 ├── .env                          # secrets (gitignored)
 ├── pyproject.toml                # deps + console_scripts entry points
 ├── Makefile                      # thin wrapper around console_scripts
+├── apps/
+│   └── web/                      # React dashboard shell (Yarn + Vite)
 ├── data/
 │   ├── distill.db                # SQLite (gitignored)
 │   └── blobs/                    # raw artifact payloads (gitignored)

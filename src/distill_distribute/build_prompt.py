@@ -1,4 +1,5 @@
 """Build a single MVP prompt from a pack (manifest + all modules) and a task."""
+
 from __future__ import annotations
 
 import argparse

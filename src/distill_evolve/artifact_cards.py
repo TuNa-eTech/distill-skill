@@ -1,4 +1,5 @@
 """Canonical artifact cards for LLM extraction."""
+
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
@@ -59,7 +60,9 @@ def build_artifact_card(
         )
 
     if not _has_signal(sections):
-        raise ValueError(f"Artifact {artifact_id} has insufficient signal for canonical extraction.")
+        raise ValueError(
+            f"Artifact {artifact_id} has insufficient signal for canonical extraction."
+        )
 
     frontmatter = [
         "---",
@@ -117,14 +120,15 @@ def render_supporting_artifacts_text(supporting_artifacts: Sequence[Mapping[str,
                 else {},
             )
         except ValueError:
-            fallback = (
-                _first_non_empty(
-                    _coerce_text((metadata or {}).get("summary") if isinstance(metadata, Mapping) else ""),
-                    _coerce_text((metadata or {}).get("title") if isinstance(metadata, Mapping) else ""),
-                    str(artifact["external_id"]),
-                )
-                or str(artifact["external_id"])
-            )
+            fallback = _first_non_empty(
+                _coerce_text(
+                    (metadata or {}).get("summary") if isinstance(metadata, Mapping) else ""
+                ),
+                _coerce_text(
+                    (metadata or {}).get("title") if isinstance(metadata, Mapping) else ""
+                ),
+                str(artifact["external_id"]),
+            ) or str(artifact["external_id"])
             card = f"# Summary\n{fallback}\n\n## Intent\nNo supporting details available."
 
         blocks.append(
@@ -153,7 +157,9 @@ def _build_gitlab_sections(
     payload_map = payload if isinstance(payload, Mapping) else {}
     mr = payload_map.get("mr") if isinstance(payload_map.get("mr"), Mapping) else {}
     changes = payload_map.get("changes") if isinstance(payload_map.get("changes"), Mapping) else {}
-    discussions = payload_map.get("discussions") if isinstance(payload_map.get("discussions"), list) else []
+    discussions = (
+        payload_map.get("discussions") if isinstance(payload_map.get("discussions"), list) else []
+    )
     commits = payload_map.get("commits") if isinstance(payload_map.get("commits"), list) else []
 
     title = _first_non_empty(metadata.get("title"), mr.get("title"), external_id) or external_id
@@ -201,7 +207,11 @@ def _build_gitlab_sections(
         metadata.get("resolved_discussion_count")
     )
     if resolved is None and discussions:
-        resolved = sum(1 for discussion in discussions if isinstance(discussion, Mapping) and discussion.get("resolved"))
+        resolved = sum(
+            1
+            for discussion in discussions
+            if isinstance(discussion, Mapping) and discussion.get("resolved")
+        )
     if discussion_count:
         decisions.append(f"Resolved discussions: {resolved or 0}/{discussion_count}")
     if linked_artifacts:
@@ -211,7 +221,11 @@ def _build_gitlab_sections(
         [
             title,
             description,
-            *[_coerce_text((commit or {}).get("message")) for commit in commits if isinstance(commit, Mapping)],
+            *[
+                _coerce_text((commit or {}).get("message"))
+                for commit in commits
+                if isinstance(commit, Mapping)
+            ],
             *[
                 _clean_text((note or {}).get("body"))
                 for discussion in discussions
@@ -258,14 +272,22 @@ def _build_jira_sections(
     comments_payload = payload_map.get("comments")
     comments = comments_payload if isinstance(comments_payload, list) else []
 
-    summary = _first_non_empty(metadata.get("summary"), fields.get("summary"), external_id) or external_id
+    summary = (
+        _first_non_empty(metadata.get("summary"), fields.get("summary"), external_id) or external_id
+    )
     description = _first_non_empty(metadata.get("description"), fields.get("description"))
     status = _first_non_empty(metadata.get("status"), ((fields.get("status") or {}).get("name")))
-    issue_type = _first_non_empty(metadata.get("issue_type"), ((fields.get("issuetype") or {}).get("name")))
+    issue_type = _first_non_empty(
+        metadata.get("issue_type"), ((fields.get("issuetype") or {}).get("name"))
+    )
     labels = _normalize_text_list(metadata.get("labels") or fields.get("labels") or [])
     components = _normalize_text_list(
         metadata.get("components")
-        or [component.get("name") for component in fields.get("components", []) if isinstance(component, Mapping)]
+        or [
+            component.get("name")
+            for component in fields.get("components", [])
+            if isinstance(component, Mapping)
+        ]
     )
     comment_count = _coerce_int(metadata.get("comment_count"))
     if comment_count is None:
@@ -301,14 +323,8 @@ def _build_jira_sections(
                 for comment in comments
                 if isinstance(comment, Mapping)
             ],
-            *[
-                _coerce_text(item)
-                for item in labels
-            ],
-            *[
-                _coerce_text(item)
-                for item in components
-            ],
+            *[_coerce_text(item) for item in labels],
+            *[_coerce_text(item) for item in components],
         ],
         limit=8,
     )
@@ -336,7 +352,10 @@ def _build_confluence_sections(
     linked_artifacts: Sequence[str],
 ) -> dict[str, list[str] | str]:
     payload_map = payload if isinstance(payload, Mapping) else {}
-    title = _first_non_empty(metadata.get("title"), payload_map.get("title"), external_id) or external_id
+    title = (
+        _first_non_empty(metadata.get("title"), payload_map.get("title"), external_id)
+        or external_id
+    )
     body_text = _first_non_empty(metadata.get("body_text"))
 
     storage_value = ""
@@ -404,8 +423,12 @@ def _build_generic_sections(
     linked_artifacts: Sequence[str],
 ) -> dict[str, list[str] | str]:
     payload_map = payload if isinstance(payload, Mapping) else {}
-    summary = _first_non_empty(metadata.get("title"), metadata.get("summary"), external_id) or external_id
-    intent = _first_non_empty(metadata.get("description"), metadata.get("body_text"), _coerce_text(payload_map))
+    summary = (
+        _first_non_empty(metadata.get("title"), metadata.get("summary"), external_id) or external_id
+    )
+    intent = _first_non_empty(
+        metadata.get("description"), metadata.get("body_text"), _coerce_text(payload_map)
+    )
     decisions = [f"Linked artifacts: {', '.join(linked_artifacts[:4])}"] if linked_artifacts else []
     evidence = _take_unique([summary, intent], limit=4)
     return {
@@ -436,7 +459,9 @@ def _render_jira_events(jira_events: Sequence[Mapping[str, Any]]) -> list[str]:
         from_value = _coerce_text(event.get("from_value"))
         to_value = _coerce_text(event.get("to_value"))
         occurred_at = _coerce_text(event.get("occurred_at"))
-        transition = " -> ".join([item for item in [from_value, to_value] if item]) or "state updated"
+        transition = (
+            " -> ".join([item for item in [from_value, to_value] if item]) or "state updated"
+        )
         if occurred_at:
             lines.append(f"{event_kind}: {transition} @ {occurred_at}")
         else:

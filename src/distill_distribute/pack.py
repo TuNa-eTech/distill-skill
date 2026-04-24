@@ -1,4 +1,5 @@
 """Filesystem helpers for reading skill packs under packs/<role>/<version>/."""
+
 from __future__ import annotations
 
 from pathlib import Path

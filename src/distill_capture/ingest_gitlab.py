@@ -1,4 +1,5 @@
 """Crawl GitLab merge requests into SQLite with redacted JSON blobs."""
+
 from __future__ import annotations
 
 import argparse
@@ -354,7 +355,9 @@ def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--since", help="Inclusive start date (YYYY-MM-DD)")
     parser.add_argument("--until", help="Inclusive end date (YYYY-MM-DD)")
-    parser.add_argument("--window", type=int, help="Rolling-day fallback if explicit dates are absent")
+    parser.add_argument(
+        "--window", type=int, help="Rolling-day fallback if explicit dates are absent"
+    )
     parser.add_argument("--max-items", type=int, default=DEFAULT_MAX_ITEMS, help="Local ingest cap")
     args = parser.parse_args(argv)
 
@@ -364,10 +367,7 @@ def main(argv: list[str] | None = None) -> None:
         until=until.isoformat(),
         limit=args.max_items,
     )
-    print(
-        f"GitLab ingest complete: {result} MRs "
-        f"({since.isoformat()}..{until.isoformat()})"
-    )
+    print(f"GitLab ingest complete: {result} MRs ({since.isoformat()}..{until.isoformat()})")
 
 
 def _fetch_gitlab_list(*, session: requests.Session, url: str) -> list[dict[str, Any]]:
@@ -409,7 +409,9 @@ def ingest_gitlab(
     client = session or build_session()
     resolved_project_ids = project_ids or _split_refs(env("GITLAB_PROJECT_IDS"))
     resolved_group_ref = group_ref or env("GITLAB_GROUP_PATH") or env("GITLAB_GROUP_ID")
-    required_single_project = session is None and not resolved_project_ids and not resolved_group_ref
+    required_single_project = (
+        session is None and not resolved_project_ids and not resolved_group_ref
+    )
     resolved_project_id = project_id or (
         env("GITLAB_PROJECT_ID", required=required_single_project) or ""
     )

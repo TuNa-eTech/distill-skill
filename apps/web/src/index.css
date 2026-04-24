@@ -1,0 +1,151 @@
+@import '@fontsource/geist/400.css';
+@import '@fontsource/geist/500.css';
+@import '@fontsource/geist/600.css';
+@import '@fontsource/geist-mono/400.css';
+@import '@fontsource/geist-mono/500.css';
+
+:root {
+  font-family: 'Geist', Arial, 'Apple Color Emoji', 'Segoe UI Emoji',
+    'Segoe UI Symbol', sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #171717;
+  background-color: #ffffff;
+  color-scheme: light;
+
+  --ds-bg: #ffffff;
+  --ds-surface: #ffffff;
+  --ds-surface-soft: #fafafa;
+  --ds-foreground: #171717;
+  --ds-secondary: #4d4d4d;
+  --ds-tertiary: #666666;
+  --ds-border: rgba(0, 0, 0, 0.08);
+  --ds-ring-border: rgb(235, 235, 235);
+  --ds-focus: hsla(212, 100%, 48%, 1);
+  --ds-focus-ring: rgba(147, 197, 253, 0.5);
+  --ds-develop: #0a72ef;
+  --ds-preview: #de1d8d;
+  --ds-ship: #ff5b4f;
+  --ds-badge-bg: #ebf5ff;
+  --ds-badge-text: #0068d6;
+  --shadow-ring: 0 0 0 1px rgba(0, 0, 0, 0.08);
+  --shadow-card:
+    rgba(0, 0, 0, 0.08) 0 0 0 1px,
+    rgba(0, 0, 0, 0.04) 0 2px 2px,
+    rgba(0, 0, 0, 0.04) 0 8px 8px -8px,
+    #fafafa 0 0 0 1px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-pill: 9999px;
+
+  font-feature-settings: 'liga' 1;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  color: var(--ds-foreground);
+  background: linear-gradient(180deg, #ffffff 0%, #fbfbfb 100%);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  border: 0;
+  padding: 0;
+  background: none;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+h1,
+h2,
+h3 {
+  font-family: 'Geist', Arial, sans-serif;
+  margin: 0;
+  color: var(--ds-foreground);
+}
+
+h1 {
+  font-size: clamp(1.85rem, 2.8vw, 2.75rem);
+  line-height: 1.04;
+  font-weight: 600;
+  letter-spacing: -0.06em;
+}
+
+h2 {
+  font-size: clamp(1.4rem, 2.2vw, 2rem);
+  line-height: 1.08;
+  font-weight: 600;
+  letter-spacing: -0.05em;
+}
+
+h3 {
+  font-size: 1.0625rem;
+  line-height: 1.32;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+p {
+  margin: 0;
+  color: var(--ds-secondary);
+  font-size: 0.9375rem;
+  line-height: 1.56;
+}
+
+code,
+pre {
+  font-family: 'Geist Mono', ui-monospace, 'SFMono-Regular', 'Roboto Mono',
+    Menlo, Monaco, 'Courier New', monospace;
+  font-feature-settings: 'liga' 1, 'tnum' 1;
+}
+
+pre {
+  margin: 0;
+  font-size: 0.875rem;
+  white-space: pre-wrap;
+}
+
+::selection {
+  background: rgba(0, 114, 245, 0.18);
+}
+
+:focus-visible {
+  outline: 2px solid var(--ds-focus);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--ds-focus-ring);
+}
+
+@media (max-width: 720px) {
+  h1 {
+    font-size: 1.85rem;
+    letter-spacing: -0.05em;
+  }
+}

@@ -1,4 +1,5 @@
 """Debug: given a module, dump the source artifacts/extractions it cites."""
+
 from __future__ import annotations
 
 import argparse

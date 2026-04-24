@@ -6,6 +6,7 @@ Provider is selected at call time via the ``LLM_PROVIDER`` env var
 (default ``openai``). MVP only implements the OpenAI/GPT provider; the
 Anthropic stub raises with explicit instructions for enabling it.
 """
+
 import json
 import re
 from typing import Any, Callable
@@ -23,6 +24,7 @@ def _provider() -> str:
 
 
 # ---------- OpenAI / GPT ----------
+
 
 def _openai_client() -> OpenAI:
     return OpenAI(api_key=env("GPT_API_KEY", required=True))
@@ -44,6 +46,7 @@ def _complete_openai(
 
 
 # ---------- Anthropic / Claude (stub for future) ----------
+
 
 def _complete_anthropic(
     *, system: str, user: str, max_tokens: int, model: str | None, temperature: float
@@ -74,9 +77,7 @@ def complete(
 ) -> str:
     provider = _provider()
     if provider not in _PROVIDERS:
-        raise RuntimeError(
-            f"Unknown LLM_PROVIDER: {provider!r}. Supported: {sorted(_PROVIDERS)}"
-        )
+        raise RuntimeError(f"Unknown LLM_PROVIDER: {provider!r}. Supported: {sorted(_PROVIDERS)}")
     return _PROVIDERS[provider](
         system=system,
         user=user,

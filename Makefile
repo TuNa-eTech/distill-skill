@@ -3,8 +3,9 @@ SINCE ?= 2026-01-01
 UNTIL ?= $(shell python -c "from datetime import date; cutoff = date(2026, 12, 31); today = date.today(); print((today if today < cutoff else cutoff).isoformat())")
 WINDOW ?= $(shell python -c "from datetime import date; start = date(2026, 1, 1); cutoff = date(2026, 12, 31); end = date.today(); end = end if end < cutoff else cutoff; print(max(1, (end - start).days + 1))")
 BIN = .venv/bin
+WEB_DIR = apps/web
 
-.PHONY: setup init-db ingest link score extract cluster synthesize validate all trace clean
+.PHONY: setup init-db ingest link score extract cluster synthesize validate all trace clean web-install web-dev web-build
 
 define RUN_INGEST
 	@if $(BIN)/$(1) --help 2>&1 | grep -q -- "--since"; then \
@@ -56,3 +57,12 @@ trace:
 clean:
 	rm -f data/distill.db
 	rm -rf data/blobs/gitlab data/blobs/jira data/blobs/confluence
+
+web-install:
+	cd $(WEB_DIR) && yarn install
+
+web-dev:
+	cd $(WEB_DIR) && yarn dev
+
+web-build:
+	cd $(WEB_DIR) && yarn build

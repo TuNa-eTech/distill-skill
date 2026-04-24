@@ -1,4 +1,5 @@
 """Run LLM extraction over top-scored artifacts; persist JSON extractions."""
+
 from __future__ import annotations
 
 import argparse

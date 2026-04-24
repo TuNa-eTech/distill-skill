@@ -98,10 +98,7 @@ def _table_exists(conn: sqlite3.Connection, table: str) -> bool:
 
 
 def _table_columns(conn: sqlite3.Connection, table: str) -> set[str]:
-    return {
-        str(row["name"])
-        for row in conn.execute(f"PRAGMA table_info({table})").fetchall()
-    }
+    return {str(row["name"]) for row in conn.execute(f"PRAGMA table_info({table})").fetchall()}
 
 
 def _parse_payload(value: str | None) -> dict[str, Any]:
@@ -188,7 +185,9 @@ def _migrate_extractions_schema(conn: sqlite3.Connection) -> None:
     columns = _table_columns(conn, "extractions")
     if "role" not in columns:
         conn.execute("ALTER TABLE extractions ADD COLUMN role TEXT")
-    conn.execute("CREATE INDEX IF NOT EXISTS idx_extractions_role_artifact ON extractions(role, artifact_id)")
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_extractions_role_artifact ON extractions(role, artifact_id)"
+    )
 
     rows = conn.execute(
         """

@@ -1,4 +1,5 @@
 """Crawl Jira issues and lifecycle events into SQLite with redacted JSON blobs."""
+
 from __future__ import annotations
 
 import argparse
@@ -27,7 +28,9 @@ DEFAULT_API_VERSION = "2"
 
 
 def _resolve_auth_mode(*, username: str, explicit: str | None = None) -> str:
-    mode = (explicit or env("JIRA_AUTH_MODE") or env("ATLASSIAN_AUTH_MODE") or "auto").strip().lower()
+    mode = (
+        (explicit or env("JIRA_AUTH_MODE") or env("ATLASSIAN_AUTH_MODE") or "auto").strip().lower()
+    )
     if mode in {"basic", "bearer"}:
         return mode
     return "bearer"
@@ -245,7 +248,9 @@ def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--since", help="Inclusive start date (YYYY-MM-DD)")
     parser.add_argument("--until", help="Inclusive end date (YYYY-MM-DD)")
-    parser.add_argument("--window", type=int, help="Rolling-day fallback if explicit dates are absent")
+    parser.add_argument(
+        "--window", type=int, help="Rolling-day fallback if explicit dates are absent"
+    )
     parser.add_argument("--max-items", type=int, default=DEFAULT_MAX_ITEMS, help="Local ingest cap")
     args = parser.parse_args(argv)
 
@@ -255,10 +260,7 @@ def main(argv: list[str] | None = None) -> None:
         until=until.isoformat(),
         limit=args.max_items,
     )
-    print(
-        f"Jira ingest complete: {result} issues "
-        f"({since.isoformat()}..{until.isoformat()})"
-    )
+    print(f"Jira ingest complete: {result} issues ({since.isoformat()}..{until.isoformat()})")
 
 
 def _jira_username() -> str:
@@ -310,7 +312,9 @@ def ingest_jira(
     resolved_base_url = base_url or (
         env("JIRA_URL", required=session is None) or "https://company.atlassian.net"
     )
-    resolved_project_key = project_key or (env("JIRA_PROJECT_KEY", required=session is None) or "APP")
+    resolved_project_key = project_key or (
+        env("JIRA_PROJECT_KEY", required=session is None) or "APP"
+    )
     resolved_username = username or (_jira_username() if session is None else "")
     resolved_token = token or (_jira_token() if session is None else "")
     resolved_auth_mode = auth_mode or env("JIRA_AUTH_MODE") or env("ATLASSIAN_AUTH_MODE")

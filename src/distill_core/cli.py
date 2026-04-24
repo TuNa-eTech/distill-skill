@@ -1,4 +1,5 @@
 """Console-script entry points for distill_core."""
+
 from .config import DB_PATH
 from .db import init_schema
 

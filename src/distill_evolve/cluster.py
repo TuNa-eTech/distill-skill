@@ -1,4 +1,5 @@
 """Interactive clustering — show extraction, prompt for cluster name, save."""
+
 from __future__ import annotations
 
 import argparse

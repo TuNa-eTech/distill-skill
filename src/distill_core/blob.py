@@ -1,4 +1,5 @@
 """Helpers for redacted blob persistence under data/blobs/."""
+
 from __future__ import annotations
 
 import json

@@ -1,4 +1,5 @@
 """Link artifacts across sources via deterministic Jira key extraction."""
+
 from __future__ import annotations
 
 import json
@@ -25,7 +26,8 @@ def run_linking(*, db_path: Path = DB_PATH, blob_root: Path = BLOBS_DIR) -> dict
             """
         ).fetchall()
         jira_index = {
-            (json.loads(row["metadata"]).get("key") or row["external_id"]): row["id"] for row in jira_rows
+            (json.loads(row["metadata"]).get("key") or row["external_id"]): row["id"]
+            for row in jira_rows
         }
 
         source_rows = conn.execute(

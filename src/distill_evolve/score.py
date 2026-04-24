@@ -1,4 +1,5 @@
 """Compute composite quality scores per artifact for the given role."""
+
 from __future__ import annotations
 
 import argparse
@@ -265,7 +266,9 @@ def _jira_scope_change_count(conn: sqlite3.Connection, issue_ids: list[int]) -> 
     return total
 
 
-def _rollback_detected(conn: sqlite3.Connection, artifact: sqlite3.Row, metadata: dict[str, Any]) -> bool:
+def _rollback_detected(
+    conn: sqlite3.Connection, artifact: sqlite3.Row, metadata: dict[str, Any]
+) -> bool:
     for flag in ("rollback_detected", "reverted", "followup_rollback"):
         if metadata.get(flag):
             return True
@@ -322,7 +325,10 @@ def score_mobile_mr(conn: sqlite3.Connection, artifact_id: int) -> tuple[float, 
         if state in {"closed", "locked"} and not metadata.get("merged_at")
         else 0.0,
         "linked_jira_done": 1.5
-        if any(row["kind"] == "jira_issue" and _is_done_status(meta.get("status")) for row, meta in linked_meta)
+        if any(
+            row["kind"] == "jira_issue" and _is_done_status(meta.get("status"))
+            for row, meta in linked_meta
+        )
         else 0.0,
         "linked_confluence": 1.0
         if any(row["kind"] == "confluence_page" for row, _ in linked_meta)
@@ -379,7 +385,9 @@ def score_ba_artifact(conn: sqlite3.Connection, artifact_id: int) -> tuple[float
             if _contains_any(module_text, ("acceptance criteria", "given", "when", "then"))
             else 0.0,
             "scope_clarity": 0.5
-            if _contains_any(module_text, ("edge case", "out of scope", "open question", "risk", "assumption"))
+            if _contains_any(
+                module_text, ("edge case", "out of scope", "open question", "risk", "assumption")
+            )
             else 0.0,
             "module_area_match": 0.5 if _contains_any(module_text, BA_MODULE_KEYWORDS) else 0.0,
             "substantive_content": 1.0 if len(body_text) >= 400 else 0.0,
@@ -432,9 +440,8 @@ def score_tester_manual_artifact(
 
     bug_like = _contains_any(issue_type, BUG_LIKE_ISSUE_TYPES)
     tester_relevant = bug_like or _contains_any(module_text, TESTER_MODULE_KEYWORDS)
-    has_expected_actual = (
-        ("actual result" in module_text and "expected result" in module_text)
-        or ("actual:" in module_text and "expected:" in module_text)
+    has_expected_actual = ("actual result" in module_text and "expected result" in module_text) or (
+        "actual:" in module_text and "expected:" in module_text
     )
 
     breakdown = {
@@ -445,7 +452,9 @@ def score_tester_manual_artifact(
         else 0.0,
         "expected_vs_actual": 1.0 if has_expected_actual else 0.0,
         "environment_details": 0.5
-        if _contains_any(module_text, ("environment", "device", "version", "build", "ios", "android"))
+        if _contains_any(
+            module_text, ("environment", "device", "version", "build", "ios", "android")
+        )
         else 0.0,
         "regression_signal": 1.0
         if _contains_any(module_text, ("regression", "release", "smoke", "hotfix"))

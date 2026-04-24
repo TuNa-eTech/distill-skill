@@ -1,4 +1,5 @@
 """Validate pack citations and token budgets for synthesized skill packs."""
+
 from __future__ import annotations
 
 import argparse
@@ -9,6 +10,7 @@ from pathlib import Path
 
 from distill_core.config import PACKS_DIR
 from distill_core.roles import SUPPORTED_ROLES
+
 SOURCE_RE = re.compile(r"\[src:\s*([^\]]+)\]")
 REQUIRED_CITATION_SECTIONS = {
     "rules",
@@ -110,9 +112,7 @@ def validate_role_pack(
         errors.extend(validate_module_text(manifest_text, module_name=manifest_path.name))
 
     if total_tokens > total_token_cap:
-        errors.append(
-            f"Pack {role}/v0.1 exceeds the 20000-token cap (~{total_tokens} tokens)."
-        )
+        errors.append(f"Pack {role}/v0.1 exceeds the 20000-token cap (~{total_tokens} tokens).")
 
     return {"ok": not errors, "errors": errors, "modules": modules, "total_tokens": total_tokens}
 

@@ -1,4 +1,5 @@
 """Synthesize one skill module per cluster; write packs/<role>/v0.1/skills/*.md."""
+
 from __future__ import annotations
 
 import argparse
@@ -139,7 +140,13 @@ def _build_manifest(
     written_modules: list[Path],
 ) -> str:
     role_config = get_role_config(role)
-    lines = [f"# {role} - Skill Pack Manifest (v0.1)", "", *role_config.manifest_intro, "", "## Hard rules"]
+    lines = [
+        f"# {role} - Skill Pack Manifest (v0.1)",
+        "",
+        *role_config.manifest_intro,
+        "",
+        "## Hard rules",
+    ]
 
     rule_candidates = _collect_rule_candidates(module_rows)
     if rule_candidates:
