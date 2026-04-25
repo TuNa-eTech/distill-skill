@@ -1,24 +1,27 @@
 import { useEffect, useState } from 'react'
-import { NavLink, Outlet, useLocation } from 'react-router'
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router'
+import type { DashboardContextValue } from './dashboardContext'
 import { StatusBadge } from '../components/StatusBadge'
+import { buildApiPath, useApiData } from '../features/dashboard/api'
+import type { RolesResponse } from '../features/dashboard/types'
 
 const navItems = [
   {
     to: '/',
     label: 'Overview',
-    description: 'Health, source coverage, and pack posture.',
+    description: 'Current pack posture and source coverage.',
     index: '01',
   },
   {
     to: '/pipeline',
     label: 'Pipeline',
-    description: 'Run state, step timing, and operator actions.',
+    description: 'Derived stage status from the live snapshot.',
     index: '02',
   },
   {
     to: '/review',
     label: 'Review',
-    description: 'Queue triage, evidence, and correction loop.',
+    description: 'Persisted extraction inspection workbench.',
     index: '03',
   },
 ]
@@ -27,17 +30,17 @@ const pageCopy: Record<string, { eyebrow: string; heading: string; text: string 
   '/': {
     eyebrow: 'Overview',
     heading: 'Control plane overview',
-    text: 'Monitor ingestion health, review pressure, and pack readiness without drifting back into a landing-page layout.',
+    text: 'Inspect current role-backed facts without drifting into a speculative control-plane shell.',
   },
   '/pipeline': {
     eyebrow: 'Pipeline',
-    heading: 'Run state and operator handoff',
-    text: 'Each stage should be legible enough to operate, debug, and rerun without leaving the dashboard shell.',
+    heading: 'Current stage posture',
+    text: 'Each stage is derived from SQLite, generated pack files, and the live validation rules.',
   },
   '/review': {
     eyebrow: 'Review',
-    heading: 'Human correction loop',
-    text: 'Keep the queue dense, calm, and hard to misuse while reviewers shape the final pack signal.',
+    heading: 'Extraction inspection',
+    text: 'Focus on persisted extraction evidence instead of local-only moderation state.',
   },
 }
 
@@ -55,19 +58,78 @@ function getPageKey(pathname: string) {
 
 export function AppShell() {
   const location = useLocation()
+  const navigate = useNavigate()
   const pageKey = getPageKey(location.pathname)
   const activePage = pageCopy[pageKey]
   const [navOpen, setNavOpen] = useState(false)
+  const rolesState = useApiData<RolesResponse>(buildApiPath('/api/roles'))
+  const roles = rolesState.data?.roles ?? []
+  const requestedRole = new URLSearchParams(location.search).get('role')
+  const fallbackRole = roles[0]?.role ?? 'mobile-dev'
+  const activeRole = roles.some((item) => item.role === requestedRole)
+    ? requestedRole || fallbackRole
+    : requestedRole || fallbackRole
+  const roleSummary = roles.find((item) => item.role === activeRole) ?? null
 
   useEffect(() => {
     setNavOpen(false)
   }, [location.pathname])
 
+  useEffect(() => {
+    if (rolesState.loading || roles.length === 0) {
+      return
+    }
+    if (requestedRole === activeRole) {
+      return
+    }
+    const nextSearch = new URLSearchParams(location.search)
+    nextSearch.set('role', activeRole)
+    navigate(
+      {
+        pathname: location.pathname,
+        search: `?${nextSearch.toString()}`,
+      },
+      { replace: true },
+    )
+  }, [
+    activeRole,
+    location.pathname,
+    location.search,
+    navigate,
+    requestedRole,
+    roles.length,
+    rolesState.loading,
+  ])
+
+  function buildRolePath(pathname: string) {
+    const nextSearch = new URLSearchParams(location.search)
+    nextSearch.set('role', activeRole)
+    return `${pathname}?${nextSearch.toString()}`
+  }
+
+  function setRole(nextRole: string) {
+    const nextSearch = new URLSearchParams(location.search)
+    nextSearch.set('role', nextRole)
+    navigate({
+      pathname: location.pathname,
+      search: `?${nextSearch.toString()}`,
+    })
+  }
+
+  const outletContext: DashboardContextValue = {
+    role: activeRole,
+    roleLabel: roleSummary?.label ?? activeRole.replace('-', ' '),
+    roles,
+    roleSummary,
+    rolesLoading: rolesState.loading,
+    rolesError: rolesState.error,
+  }
+
   return (
     <div className={`dashboard-shell${navOpen ? ' dashboard-shell--nav-open' : ''}`}>
       <aside className="dashboard-sidebar">
         <div className="dashboard-sidebar__brand">
-          <NavLink to="/" className="brand-mark" end>
+          <NavLink to={buildRolePath('/')} className="brand-mark" end>
             <span className="brand-mark__glyph">D</span>
             <span className="brand-mark__text">Distill Dashboard</span>
           </NavLink>
@@ -79,7 +141,7 @@ export function AppShell() {
             {navItems.map((item) => (
               <NavLink
                 key={item.to}
-                to={item.to}
+                to={buildRolePath(item.to)}
                 end={item.to === '/'}
                 className={({ isActive }) =>
                   `sidebar-nav__link${isActive ? ' sidebar-nav__link--active' : ''}`
@@ -99,26 +161,14 @@ export function AppShell() {
           <span className="sidebar-section__label">Pilot scope</span>
           <div className="sidebar-card__title">Internal ops only</div>
           <p className="sidebar-card__text">
-            The current surface is optimized for one operator team managing
-            role-scoped packs with human review still enforced.
+            The current surface reads directly from SQLite and generated pack files.
+            Controls without a real backend path stay hidden.
           </p>
           <div className="cluster-summary">
-            <span className="chip">mobile-dev</span>
-            <span className="chip">human-reviewed</span>
-            <span className="chip">sqlite source</span>
+            <span className="chip">{roleSummary?.role ?? activeRole}</span>
+            <span className="chip">read-only</span>
+            <span className="chip">sqlite + packs</span>
           </div>
-        </div>
-
-        <div className="sidebar-card sidebar-card--muted">
-          <div className="sidebar-card__row">
-            <span className="sidebar-section__label">Roadmap headroom</span>
-            <StatusBadge label="Soon" tone="muted" />
-          </div>
-          <ul className="sidebar-card__list">
-            <li>Packs preview surface</li>
-            <li>Run history timeline</li>
-            <li>Validation evidence browser</li>
-          </ul>
         </div>
       </aside>
 
@@ -154,33 +204,62 @@ export function AppShell() {
 
             <div className="topbar__actions">
               <div className="topbar__status">
-                <span className="inline-label inline-label--mono">role mobile-dev</span>
                 <span className="inline-label inline-label--mono">
-                  window 2026-01-01 to today
+                  role {roleSummary?.role ?? activeRole}
                 </span>
-                <StatusBadge label="Last run 12m ago" tone="warn" />
+                {roleSummary ? (
+                  <>
+                    <span className="chip">scores {roleSummary.scoreCount}</span>
+                    <span className="chip">
+                      positive {roleSummary.positiveScoreCount}
+                    </span>
+                    <span className="chip">
+                      extractions {roleSummary.extractionCount}
+                    </span>
+                    <StatusBadge
+                      label={roleSummary.packAvailable ? 'Pack ready' : 'Pack missing'}
+                      tone={roleSummary.packAvailable ? 'ok' : 'critical'}
+                    />
+                  </>
+                ) : null}
+                {!roleSummary && rolesState.loading ? (
+                  <StatusBadge label="Loading roles" tone="muted" />
+                ) : null}
+                {!roleSummary && rolesState.error ? (
+                  <StatusBadge label="Roles unavailable" tone="critical" />
+                ) : null}
               </div>
 
-              <div className="topbar__buttons">
-                <NavLink to="/review" className="button button--secondary">
-                  Review queue
-                </NavLink>
-                <button className="button button--primary" type="button">
-                  New run
-                </button>
-              </div>
+              <label className="field-label field-label--inline topbar__role-picker">
+                <span>Role</span>
+                <select
+                  value={activeRole}
+                  onChange={(event) => setRole(event.currentTarget.value)}
+                  disabled={roles.length === 0}
+                >
+                  {roles.length === 0 ? (
+                    <option value={activeRole}>{activeRole}</option>
+                  ) : (
+                    roles.map((item) => (
+                      <option key={item.role} value={item.role}>
+                        {item.label}
+                      </option>
+                    ))
+                  )}
+                </select>
+              </label>
             </div>
           </div>
         </header>
 
         <main className="dashboard-content">
-          <Outlet />
+          <Outlet context={outletContext} />
         </main>
 
         <footer className="dashboard-footer">
           <div className="dashboard-footer__inner">
             <span className="mono-kicker">control plane</span>
-            <p>Built for pipeline visibility, review discipline, and pack trust.</p>
+            <p>Built for pipeline visibility, extraction inspection, and pack trust.</p>
           </div>
         </footer>
       </div>

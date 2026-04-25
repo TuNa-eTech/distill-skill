@@ -42,6 +42,9 @@ distill-trace            = "distill_evolve.trace:main"
 # distill_distribute
 distill-build-prompt     = "distill_distribute.build_prompt:main"
 
+# distill_web
+distill-web-serve        = "distill_web.server:main"
+
 [build-system]
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"

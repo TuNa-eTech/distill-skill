@@ -1,7 +1,7 @@
 # Distill MVP — Implementation Report
 
-Status: `mvp_baseline_accepted_pending_post_mvp_optimization`
-Last updated: `2026-04-24`
+Status: `mvp_baseline_implemented_validation_packet_ready`
+Last updated: `2026-04-25`
 
 ## Defaults
 
@@ -17,8 +17,8 @@ Last updated: `2026-04-24`
 
 - Overall implementation state: `implemented + live mobile pipeline exercised + pack tightened for real use + role-scoped prompt system + first BA/tester-manual paths available`
 - Remediation state: `extractions` are now role-scoped, clustering/synthesis no longer mix cross-role extraction rows, and the live `tester-manual` pack was regenerated cleanly after removing contaminated tester data.
-- MVP acceptance note: the current baseline is accepted for MVP; deeper optimization of linking, clustering quality, BA pack depth, and tester-manual genericity moves to post-MVP backlog.
-- Final operational close condition for this report: capture human review evidence on the accepted baseline rather than reopening implementation work immediately.
+- MVP acceptance note: the current implementation baseline is accepted for validation, not yet for Phase 2. Deeper optimization of linking, clustering quality, BA pack depth, and tester-manual genericity stays in the post-MVP backlog unless validation proves it is the blocking issue.
+- Final operational close condition for this report: capture V1/V2/V3 evidence on the accepted baseline and record a decision in `validation/mvp_report.md`.
 - Use this file for repo-backed evidence only. Do not mark work complete from docs or scaffolding alone.
 
 ## Implementation Checklist
@@ -34,6 +34,14 @@ Last updated: `2026-04-24`
 - [x] `tester-manual` contamination fix shipped via role-scoped extractions
 - [x] Live clean `tester-manual` pack regenerated and validated successfully
 - [x] Test/lint/compile baseline passes on the current repo state
+- [x] V1/V2/V3 validation packet prepared without fabricating external scores
+
+### MVP Closeout Evidence
+
+- [ ] V1 expert review result recorded
+- [ ] V2 blind taste test result recorded
+- [ ] V3 self-use result recorded
+- [ ] Final decision recorded in `validation/mvp_report.md`
 
 ### Deferred Post-MVP Optimization
 
@@ -66,19 +74,19 @@ Last updated: `2026-04-24`
 | `.venv/bin/distill-validate --role tester-manual` | Pass | `Validation passed for tester-manual: 3 modules, ~3578 tokens total.` | Live tester-manual pack after clean regeneration |
 | `make extract` | Pass | `Processed 30 artifacts, inserted 30, failed 0, skipped 0` | Live dataset |
 | `make synthesize` | Pass | `Wrote 4 modules and skipped 0` | Live dataset |
-| `distill-validate --role mobile-dev` | Pass | `Validation passed for mobile-dev: 4 modules, ~3622 tokens total.` | Live pack after tightening content and pack metadata |
-| `.venv/bin/distill-build-prompt --role mobile-dev --task "implement payment schedule edit flow in Flutter"` | Pass | `prompt built` | Live pack smoke, about `12058` bytes |
-| `.venv/bin/pytest -q` | Pass | `80 passed in 1.02s` | Includes role-aware prompt loading, role-scoped extraction contamination fixes, and BA/tester-manual scoring/extraction/synthesis/pipeline smoke coverage |
-| `.venv/bin/ruff check .` | Pass | `All checks passed!` | Verified on `2026-04-24` |
-| `.venv/bin/python -m compileall -q src tests` | Pass | `pass` | Verified on `2026-04-24` |
-| `.venv/bin/distill-init-db` | Pass | `Schema ready at /Users/anhtu/MySpace/Distill Skill/data/distill.db` | Verified on `2026-04-24` |
+| `distill-validate --role mobile-dev` | Pass | `Validation passed for mobile-dev: 4 modules, ~3969 tokens total.` | Live pack after tightening content and pack metadata |
+| `.venv/bin/distill-build-prompt --role mobile-dev --task "implement payment schedule edit flow in Flutter"` | Pass | `prompt built` | Live pack smoke, about `12468` bytes |
+| `.venv/bin/pytest -q` | Pass | `84 passed in 2.35s` | Includes role-aware prompt loading, role-scoped extraction contamination fixes, BA/tester-manual scoring/extraction/synthesis/pipeline smoke coverage, and dashboard API tests |
+| `.venv/bin/ruff check .` | Pass | `All checks passed!` | Verified on `2026-04-25` |
+| `.venv/bin/python -m compileall -q src tests` | Pass | `pass` | Verified on `2026-04-25` |
+| `.venv/bin/distill-init-db` | Pass | `Schema ready at /Users/anhtu/MySpace/Distill Skill/data/distill.db` | Verified on `2026-04-25` |
 
 ## Files / Artifacts Produced
 
 - Generated pack: `packs/mobile-dev/v0.1/manifest.md`, `packs/mobile-dev/v0.1/pack.yaml`, and `4` live skill modules, now curated into Vietnamese-first guidance with corrected provenance metadata.
 - Prompt namespaces now exist at `prompts/mobile-dev/`, `prompts/business-analyst/`, `prompts/tester-manual/`, and `prompts/shared/`.
 - Live non-dev pack output now exists for `tester-manual` under `packs/tester-manual/v0.1/` with `bug-report-quality`, `regression-strategy`, and `test-case-design`.
-- Validation files updated: `validation/expert_review_rubric.md`, `validation/blind_test_packet.md`, `validation/self_use_log.md`, `validation/mvp_report.md`
+- Validation files prepared: `validation/expert_review_rubric.md`, `validation/blind_test_packet.md`, `validation/blind_test_key.md`, `validation/self_use_log.md`, `validation/mvp_report.md`
 - Report attachments or screenshots: none
 
 ## Deferred / Blocked
@@ -89,7 +97,8 @@ Last updated: `2026-04-24`
 - `business-analyst` still lacks a stronger live pack generated from real data beyond the first limited pass.
 - `tester-manual` now has a live clean pack, but content quality should still be reviewed in one real QA task before treating it as broadly reusable guidance.
 - MR↔Jira linking remains sparse, but this is now tracked as post-MVP optimization rather than a release blocker.
+- Phase 2 is not yet decided because V1/V2/V3 product-value evidence is still pending.
 
 ## Next Action
 
-- Freeze the accepted MVP baseline, use `mobile-dev` and `tester-manual` packs in one real task each, and collect review evidence before opening the post-MVP optimization backlog.
+- Collect V1 expert review, V2 blind-test judgments, and V3 self-use logs for `mobile-dev/v0.1`; then update `validation/mvp_report.md` with the decision matrix result before proposing Phase 2.

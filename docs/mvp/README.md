@@ -62,6 +62,11 @@ storage thành Postgres + cron + Confluence/Claude Project distribution.
 
 ## Status
 
-🟢 **MVP baseline implemented**. Pilot role vẫn là `mobile-dev`, live `mobile-dev` pack đã có dưới `packs/mobile-dev/v0.1/`, và role extension path hiện đã có thêm `business-analyst` scaffold cùng `tester-manual` live pack sạch.
+🟡 **MVP baseline implemented; validation decision pending**. Pilot role vẫn là
+`mobile-dev`, live `mobile-dev` pack đã có dưới `packs/mobile-dev/v0.1/`, và
+validation packet V1/V2/V3 đã sẵn sàng để thu evidence thật.
 
-Next action: dùng [PROGRESS.md](PROGRESS.md) làm source of truth, giữ baseline hiện tại cho MVP, và đẩy các việc tối ưu sâu sang backlog sau MVP.
+Next action: dùng [PROGRESS.md](PROGRESS.md) làm source of truth, thu V1 expert
+review, V2 blind-test scoring, V3 self-use logs, rồi mới chốt `Go Phase 2 |
+Iterate MVP | Pivot | Stop`. Chưa claim Phase 2 khi `validation/mvp_report.md`
+còn pending evidence.

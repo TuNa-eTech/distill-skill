@@ -1,36 +1,45 @@
+import { useDashboardContext } from '../app/dashboardContext'
 import { StatusBadge } from '../components/StatusBadge'
-import {
-  latestRun,
-  pipelineFilters,
-  pipelineSteps,
-} from '../features/dashboard/mockData'
-
-const operatorActions = [
-  {
-    title: 'Run full pipeline',
-    note: 'Kick off the full ingest to validate chain for the current role window.',
-    buttonLabel: 'Run all stages',
-    buttonVariant: 'primary',
-  },
-  {
-    title: 'Re-run validate',
-    note: 'Repeat the final validation gate without touching the rest of the pipeline.',
-    buttonLabel: 'Validate only',
-    buttonVariant: 'secondary',
-  },
-  {
-    title: 'Open review queue',
-    note: 'Move straight into manual triage when extraction quality looks uncertain.',
-    buttonLabel: 'Go to review',
-    buttonVariant: 'secondary',
-  },
-] as const
+import { buildApiPath, useApiData } from '../features/dashboard/api'
+import type { PipelineResponse } from '../features/dashboard/types'
 
 export function PipelinePage() {
+  const { role } = useDashboardContext()
+  const pipelineState = useApiData<PipelineResponse>(
+    buildApiPath('/api/pipeline', { role }),
+  )
+
+  if (pipelineState.loading) {
+    return (
+      <div className="empty-state">
+        <div className="empty-state__card">
+          <span className="page-eyebrow">Pipeline</span>
+          <h2>Loading pipeline snapshot.</h2>
+          <p>The stage rail is waiting for the current role-backed API response.</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (pipelineState.error || !pipelineState.data) {
+    return (
+      <div className="empty-state">
+        <div className="empty-state__card">
+          <span className="page-eyebrow">Pipeline</span>
+          <h2>Unable to load the pipeline snapshot.</h2>
+          <p>{pipelineState.error ?? 'The API did not return pipeline data.'}</p>
+        </div>
+      </div>
+    )
+  }
+
+  const { badges, commands, filters, packSummary, stages, validation } =
+    pipelineState.data
+
   return (
     <div className="page-grid">
       <section className="filter-bar">
-        {pipelineFilters.map((filter) => (
+        {filters.map((filter) => (
           <article key={filter.label} className="filter-tile">
             <span className="filter-tile__label">{filter.label}</span>
             <span className="filter-tile__value">{filter.value}</span>
@@ -38,8 +47,9 @@ export function PipelinePage() {
         ))}
 
         <div className="filter-bar__meta">
-          <StatusBadge label="Mock data" tone="muted" />
-          <StatusBadge label="Human reviewed" tone="info" />
+          {badges.map((badge) => (
+            <StatusBadge key={badge.label} label={badge.label} tone={badge.tone} />
+          ))}
         </div>
       </section>
 
@@ -49,14 +59,17 @@ export function PipelinePage() {
             <div>
               <span className="mono-kicker">stage rail</span>
               <h2>Stage status</h2>
-              <p>Each card maps to one Distill CLI stage in the local pipeline chain.</p>
+              <p>
+                Each card is derived from the current DB snapshot, pack files, and
+                live validation rules.
+              </p>
             </div>
-            <StatusBadge label="7 stages" tone="info" />
+            <StatusBadge label={`${stages.length} stages`} tone="info" />
           </div>
 
           <div className="stage-rail">
-            {pipelineSteps.map((step, index) => (
-              <article key={step.name} className="stage-card">
+            {stages.map((step, index) => (
+              <article key={step.key} className="stage-card">
                 <div className="stage-card__index">
                   {String(index + 1).padStart(2, '0')}
                 </div>
@@ -65,21 +78,21 @@ export function PipelinePage() {
                   <div className="stage-card__header">
                     <div>
                       <span className="mono-kicker">stage</span>
-                      <h3>{step.name}</h3>
+                      <h3>{step.label}</h3>
                     </div>
-                    <StatusBadge label={step.statusLabel} tone={step.status} />
+                    <StatusBadge label={step.stateLabel} tone={step.tone} />
                   </div>
 
-                  <p>{step.description}</p>
+                  <p>{step.summary}</p>
 
                   <div className="stage-card__meta">
-                    <span>Duration {step.duration}</span>
-                    <span>{step.output}</span>
-                    <span>{step.freshness}</span>
+                    {step.facts.map((fact) => (
+                      <span key={fact}>{fact}</span>
+                    ))}
                   </div>
 
                   <div className="stage-card__detail">
-                    <span className="chip">{step.nextAction}</span>
+                    <span className="chip">{step.description}</span>
                   </div>
                 </div>
               </article>
@@ -91,59 +104,45 @@ export function PipelinePage() {
           <section className="panel">
             <div className="panel__header">
               <div>
-                <span className="mono-kicker">run summary</span>
-                <h2>Latest run snapshot</h2>
-                <p>The pipeline page should keep current run context pinned next to the stage rail.</p>
+                <span className="mono-kicker">pack output</span>
+                <h2>Generated files</h2>
+                <p>
+                  This summary comes from the actual `pack.yaml`, `manifest.md`,
+                  and skill module files.
+                </p>
               </div>
-              <StatusBadge label={latestRun.statusLabel} tone={latestRun.tone} />
+              <StatusBadge
+                label={packSummary.available ? 'Pack found' : 'Pack missing'}
+                tone={packSummary.available ? 'ok' : 'critical'}
+              />
             </div>
 
-            <div className="run-highlight">
-              <div className="run-highlight__heading">
-                <div>
-                  <span className="inline-label inline-label--mono">{latestRun.id}</span>
-                  <h3>{latestRun.headline}</h3>
-                </div>
-              </div>
-              <p>{latestRun.note}</p>
-              <div className="facts-grid">
-                {latestRun.facts.map((fact) => (
-                  <article key={fact.label} className="fact-tile">
-                    <span className="fact-tile__label">{fact.label}</span>
-                    <span className="fact-tile__value">{fact.value}</span>
-                  </article>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          <section className="panel">
-            <div className="panel__header">
-              <div>
-                <span className="mono-kicker">operator actions</span>
-                <h2>Quick actions</h2>
-                <p>Action hierarchy mirrors how an operator actually approaches the pipeline.</p>
-              </div>
+            <div className="facts-grid">
+              <article className="fact-tile">
+                <span className="fact-tile__label">Version</span>
+                <span className="fact-tile__value">{packSummary.version}</span>
+              </article>
+              <article className="fact-tile">
+                <span className="fact-tile__label">Generated at</span>
+                <span className="fact-tile__value">
+                  {packSummary.generatedAt || 'Unknown'}
+                </span>
+              </article>
+              <article className="fact-tile">
+                <span className="fact-tile__label">Filtered in</span>
+                <span className="fact-tile__value">{String(packSummary.filteredIn)}</span>
+              </article>
+              <article className="fact-tile">
+                <span className="fact-tile__label">Modules</span>
+                <span className="fact-tile__value">{String(packSummary.moduleCount)}</span>
+              </article>
             </div>
 
-            <div className="action-stack">
-              {operatorActions.map((action) => (
-                <article key={action.title} className="action-card">
-                  <div>
-                    <h3>{action.title}</h3>
-                    <p>{action.note}</p>
-                  </div>
-                  <button
-                    className={`button ${
-                      action.buttonVariant === 'primary'
-                        ? 'button--primary'
-                        : 'button--secondary'
-                    }`}
-                    type="button"
-                  >
-                    {action.buttonLabel}
-                  </button>
-                </article>
+            <div className="cluster-summary">
+              {packSummary.moduleNames.map((moduleName) => (
+                <span key={moduleName} className="chip">
+                  {moduleName}
+                </span>
               ))}
             </div>
           </section>
@@ -151,30 +150,69 @@ export function PipelinePage() {
           <section className="panel">
             <div className="panel__header">
               <div>
+                <span className="mono-kicker">validation</span>
+                <h2>Validator output</h2>
+                <p>
+                  The validation state is computed from
+                  `distill_evolve.validate.validate_role_pack`.
+                </p>
+              </div>
+              <StatusBadge
+                label={validation.ok ? 'Validation pass' : 'Validation errors'}
+                tone={validation.ok ? 'ok' : 'critical'}
+              />
+            </div>
+
+            <div className="facts-grid">
+              <article className="fact-tile">
+                <span className="fact-tile__label">Modules checked</span>
+                <span className="fact-tile__value">{String(validation.moduleCount)}</span>
+              </article>
+              <article className="fact-tile">
+                <span className="fact-tile__label">Token estimate</span>
+                <span className="fact-tile__value">{String(validation.totalTokens)}</span>
+              </article>
+            </div>
+
+            {validation.errors.length > 0 ? (
+              <div className="attention-list">
+                {validation.errors.map((error) => (
+                  <article key={error} className="attention-item">
+                    <div className="attention-item__top">
+                      <h3>Validation error</h3>
+                      <StatusBadge label="critical" tone="critical" />
+                    </div>
+                    <p>{error}</p>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <div className="prototype-note">
+                Validation passes on the current pack snapshot for this role.
+              </div>
+            )}
+          </section>
+
+          <section className="panel">
+            <div className="panel__header">
+              <div>
                 <span className="mono-kicker">command handoff</span>
                 <h2>Local shortcuts</h2>
-                <p>Repo-level commands already wired for the Python pipeline and the React shell.</p>
+                <p>
+                  The web shell stays read-only, but it shows the commands that
+                  mutate the pipeline state.
+                </p>
               </div>
               <StatusBadge label="Root Makefile" tone="ok" />
             </div>
 
             <div className="code-panel">
-              <pre>{`make web-install
-make web-dev
-
-make ingest
-make link
-make score ROLE=mobile-dev
-make extract ROLE=mobile-dev
-make cluster ROLE=mobile-dev
-make synthesize ROLE=mobile-dev
-make validate ROLE=mobile-dev`}</pre>
+              <pre>{commands.join('\n')}</pre>
             </div>
 
             <div className="prototype-note">
-              The controls and summaries are still backed by mock data. The next
-              backend pass should wire them to persisted runs, step logs, and
-              real durations.
+              Trigger-run actions and writeback controls stay out of this UI until
+              a real backend exists.
             </div>
           </section>
         </div>

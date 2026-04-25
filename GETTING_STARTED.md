@@ -82,14 +82,18 @@ scores, extractions, clusters`.
 
 ```bash
 make web-install
+make web-api
 make web-dev
 ```
 
-Hoặc chạy trực tiếp:
+Chạy ở 2 terminal:
 
 ```bash
+# terminal 1
+make web-api
+
+# terminal 2
 cd apps/web
-yarn install
 yarn dev
 ```
 

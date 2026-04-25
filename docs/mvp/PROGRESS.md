@@ -4,10 +4,10 @@
 
 | Item | Value |
 |---|---|
-| Current status | MVP baseline is now operational and temporarily accepted as-is. The 2026-YTD pipeline has run against live sources, `mobile-dev` has a tightened Vietnamese-ready pack under `packs/mobile-dev/v0.1/`, `tester-manual` has a fresh live Jira-based pack under `packs/tester-manual/v0.1/`, and role-scoped extractions now prevent cross-role contamination during clustering/synthesis. |
-| Current active phase | `G — Validation harness / MVP closeout` |
-| Current blockers | No MVP blocker is open. Deferred post-MVP optimization backlog: MR↔Jira link coverage, stronger live BA pack quality, genericity cleanup for `tester-manual` modules, and a fuller manual clustering pass. |
-| Last updated | `2026-04-24` |
+| Current status | MVP implementation baseline is operational, the generated `mobile-dev/v0.1` pack validates, and the V1/V2/V3 validation packet is now prepared for evidence collection. The project-value decision is still pending real reviewer, judge, and self-use evidence. |
+| Current active phase | `G — External validation evidence collection / MVP decision` |
+| Current blockers | No code blocker is open. The Phase 2 decision is blocked on V1 expert review, V2 blind taste test scoring, and V3 self-use logs. Deferred post-MVP optimization backlog remains: MR↔Jira link coverage, stronger live BA pack quality, genericity cleanup for `tester-manual` modules, and a fuller manual clustering pass. |
+| Last updated | `2026-04-25` |
 | Pilot defaults | role=`mobile-dev`, stack=`Flutter`, LLM=`OpenAI-first`, local ingest scope=`2026-01-01..today`, MVP=`full pipeline` |
 
 ## Progress Checklist
@@ -23,6 +23,14 @@
 - [x] `distill-validate --role mobile-dev` pass trên live pack
 - [x] Multi-role prompt/runtime path đã có cho `business-analyst` và `tester-manual`
 - [x] `tester-manual` live pack đã được regenerate sạch sau khi fix role-scoped extractions
+- [x] Validation packet đã sẵn sàng: V1 rubric, V2 blind-test tasks/key, V3 self-use log, MVP report guardrail
+
+### MVP Decision Evidence
+
+- [ ] Thu V1 expert review score thật cho `mobile-dev/v0.1`
+- [ ] Generate/chấm V2 blind taste test outputs cho 5 task `mobile-dev`
+- [ ] Ghi đủ 5 V3 self-use logs từ task thật hoặc mô phỏng sát workflow thật
+- [ ] Cập nhật `validation/mvp_report.md` với verdict `Go Phase 2 | Iterate MVP | Pivot | Stop`
 
 ### Post-MVP Optimization Backlog
 
@@ -30,7 +38,6 @@
 - [ ] Generate BA live pack mạnh hơn từ Jira/Confluence data thật
 - [ ] Làm `tester-manual` modules generic hơn, bớt domain-specific
 - [ ] Làm manual clustering pass sâu hơn thay cho heuristic-assisted clustering
-- [ ] Fill V1/V2/V3 validation evidence templates bằng review/use-case thật
 
 ## Phase Overview
 
@@ -42,7 +49,7 @@
 | D — Distill pipeline | Produce extractions, manual clusters, and synthesized module drafts | `done` | Draft clusters and module content exist for Flutter/mobile patterns | Live run inserted `30` extractions and assigned them into `4` clusters (`state management`, `navigation`, `platform integration`, `code review conventions`) via heuristic-assisted clustering | Freeze for MVP; revisit deeper manual clustering after MVP |
 | E — Pack assembly | Freeze `packs/mobile-dev/v0.1/` with manifest, skills, and `pack.yaml` | `done` | Pack tree exists with 3–5 modules and provenance metadata | Live pack now exists in `packs/mobile-dev/v0.1/` with `manifest.md`, `pack.yaml`, `4` curated skill modules, corrected contributor metadata, and Vietnamese-first guidance text | Keep as MVP baseline and collect human feedback before further tuning |
 | F — Distribution helpers | Compose a usable AI prompt from the generated pack | `done` | `distill-build-prompt --role mobile-dev --task "..."` works against a real pack | Prompt build smoke succeeded against the live pack and produced a ~12 KB prompt for a Flutter task | Keep stable through MVP; optimize prompt usefulness later |
-| G — Validation harness | Prepare evidence templates and final validation flow | `done` | Validation templates exist and `distill-validate` passes on a real pack | `distill-validate --role mobile-dev` now passes on the live pack (`4 modules`, `~3622 tokens`); validator also enforces `>=2` distinct source IDs per rule bullet and validates `manifest.md` itself | Use the current baseline for V1/V2/V3 evidence capture; defer deeper quality tuning until after MVP |
+| G — Validation harness | Prepare evidence packet and final decision flow | `in_progress` | V1/V2/V3 evidence is collected and `validation/mvp_report.md` records a decision | `distill-validate --role mobile-dev` passes on the live pack; `validation/expert_review_rubric.md`, `validation/blind_test_packet.md`, `validation/blind_test_key.md`, `validation/self_use_log.md`, and `validation/mvp_report.md` are prepared for evidence collection | Collect real V1/V2/V3 evidence before any Phase 2 claim |
 
 ## Phase Detail
 
@@ -117,11 +124,12 @@
 ### G — Validation Harness
 
 - Goal: make MVP evidence collection operational, not ad hoc.
-- In scope: validation templates, implementation report skeleton, later validator pass/fail evidence.
-- Done when: validation files are ready and real validation output can be recorded in one place.
-- Status: `done`
-- Evidence: the live pack passes `distill-validate --role mobile-dev` with `4` modules and an estimated `~3622` tokens total; manifest hard rules are now validated with the same citation standard as skill modules.
+- In scope: validation packet, implementation report skeleton, real V1/V2/V3 evidence, final decision report.
+- Done when: V1/V2/V3 results are recorded and `validation/mvp_report.md` contains a decision.
+- Status: `in_progress`
+- Evidence: the live pack passes `distill-validate --role mobile-dev` with `4` modules and an estimated `~3969` tokens total; manifest hard rules are now validated with the same citation standard as skill modules.
 - Evidence: the live clean `tester-manual` pack also passes `distill-validate --role tester-manual` with `3` modules and an estimated `~3578` tokens total after removing cross-role contamination from extractions.
-- Open risks: V1/V2/V3 evidence templates are still empty, and the validator only proves format/provenance quality, not end-user usefulness.
-- Blockers: none at code level.
-- Next action: treat the harness as MVP-complete, then use the templates in the first real review cycle before post-MVP optimization.
+- Evidence: V1/V2/V3 files are no longer blank templates; the packet now has reviewer instructions, five concrete blind-test tasks, an operator answer key, self-use task candidates, and a guarded MVP report.
+- Open risks: external evidence is still pending, and the validator only proves format/provenance quality, not end-user usefulness.
+- Blockers: none at code level; decision is blocked on evidence collection.
+- Next action: collect V1/V2/V3 evidence, then update `validation/mvp_report.md` with the decision matrix result.

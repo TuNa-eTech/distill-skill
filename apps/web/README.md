@@ -18,6 +18,19 @@ The latest `create-vite` release requires `20.19+`.
 ```bash
 cd apps/web
 yarn install
+```
+
+Start the read-only API in one terminal:
+
+```bash
+cd ../..
+.venv/bin/distill-web-serve
+```
+
+Then run the Vite app in another terminal:
+
+```bash
+cd apps/web
 yarn dev
 ```
 
@@ -44,5 +57,7 @@ The app currently ships a dashboard shell with three routes:
 - `Pipeline`
 - `Review`
 
-The data is mock-only for now. The next step is wiring these screens to the
-Distill pipeline and pack APIs.
+The data now comes from the local SQLite snapshot and generated pack files via a
+minimal Python JSON API. The current scope is read-only on purpose: unsupported
+actions such as trigger-run and review writeback are hidden until a real backend
+exists.

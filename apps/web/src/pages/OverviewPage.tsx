@@ -1,37 +1,46 @@
+import { useDashboardContext } from '../app/dashboardContext'
 import { MetricCard } from '../components/MetricCard'
 import { StatusBadge } from '../components/StatusBadge'
-import {
-  activityFeed,
-  attentionItems,
-  latestRun,
-  overviewMetrics,
-  packDefaults,
-  sourceHealth,
-} from '../features/dashboard/mockData'
-
-const workflowSteps = [
-  {
-    label: 'Develop',
-    accentClass: 'workflow-step--develop',
-    description: 'Capture the real engineering traces that are worth learning from.',
-  },
-  {
-    label: 'Preview',
-    accentClass: 'workflow-step--preview',
-    description: 'Review extracted patterns while ambiguity is still visible and reversible.',
-  },
-  {
-    label: 'Ship',
-    accentClass: 'workflow-step--ship',
-    description: 'Only publish pack guidance once it survives operator scrutiny.',
-  },
-]
+import { buildApiPath, useApiData } from '../features/dashboard/api'
+import type { OverviewResponse } from '../features/dashboard/types'
 
 export function OverviewPage() {
+  const { role } = useDashboardContext()
+  const overviewState = useApiData<OverviewResponse>(
+    buildApiPath('/api/overview', { role }),
+  )
+
+  if (overviewState.loading) {
+    return (
+      <div className="empty-state">
+        <div className="empty-state__card">
+          <span className="page-eyebrow">Overview</span>
+          <h2>Loading dashboard snapshot.</h2>
+          <p>The web shell is fetching the current SQLite and pack-backed summary.</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (overviewState.error || !overviewState.data) {
+    return (
+      <div className="empty-state">
+        <div className="empty-state__card">
+          <span className="page-eyebrow">Overview</span>
+          <h2>Unable to load the current overview.</h2>
+          <p>{overviewState.error ?? 'The API did not return overview data.'}</p>
+        </div>
+      </div>
+    )
+  }
+
+  const { alerts, metrics, packSummary, snapshotFacts, sourceHealth, validation } =
+    overviewState.data
+
   return (
     <div className="page-grid">
       <section className="stats-grid" aria-label="Overview metrics">
-        {overviewMetrics.map((metric) => (
+        {metrics.map((metric) => (
           <MetricCard key={metric.label} {...metric} />
         ))}
       </section>
@@ -40,24 +49,21 @@ export function OverviewPage() {
         <section className="panel">
           <div className="panel__header">
             <div>
-              <span className="mono-kicker">workflow rail</span>
-              <h2>Develop to preview to ship</h2>
+              <span className="mono-kicker">current snapshot</span>
+              <h2>Role-backed operating facts</h2>
               <p>
-                Accent colors stay reserved for workflow intent, while the rest of
-                the dashboard remains monochrome and quiet.
+                These facts are derived directly from the current DB snapshot and
+                generated pack metadata.
               </p>
             </div>
-            <StatusBadge label="Ops posture" tone="info" />
+            <StatusBadge label={overviewState.data.roleLabel} tone="info" />
           </div>
 
-          <div className="workflow-rail">
-            {workflowSteps.map((step) => (
-              <article
-                key={step.label}
-                className={`workflow-rail__step ${step.accentClass}`}
-              >
-                <span className="workflow-rail__label">{step.label}</span>
-                <p>{step.description}</p>
+          <div className="facts-grid">
+            {snapshotFacts.map((fact) => (
+              <article key={fact.label} className="fact-tile">
+                <span className="fact-tile__label">{fact.label}</span>
+                <span className="fact-tile__value">{fact.value}</span>
               </article>
             ))}
           </div>
@@ -66,30 +72,42 @@ export function OverviewPage() {
         <section className="panel">
           <div className="panel__header">
             <div>
-              <span className="mono-kicker">latest run</span>
-              <h2>Current production posture</h2>
-              <p>The dashboard should foreground the current run before any deeper analysis.</p>
+              <span className="mono-kicker">validation</span>
+              <h2>Pack validity</h2>
+              <p>
+                The current token budget and citation validation result come from
+                the real validator.
+              </p>
             </div>
-            <StatusBadge label={latestRun.statusLabel} tone={latestRun.tone} />
+            <StatusBadge label={validation.label} tone={validation.tone} />
           </div>
 
-          <div className="run-highlight">
-            <div className="run-highlight__heading">
-              <div>
-                <span className="inline-label inline-label--mono">{latestRun.id}</span>
-                <h3>{latestRun.headline}</h3>
-              </div>
-            </div>
-            <p>{latestRun.note}</p>
-            <div className="facts-grid">
-              {latestRun.facts.map((fact) => (
-                <article key={fact.label} className="fact-tile">
-                  <span className="fact-tile__label">{fact.label}</span>
-                  <span className="fact-tile__value">{fact.value}</span>
+          <div className="facts-grid">
+            {validation.facts.map((fact) => (
+              <article key={fact.label} className="fact-tile">
+                <span className="fact-tile__label">{fact.label}</span>
+                <span className="fact-tile__value">{fact.value}</span>
+              </article>
+            ))}
+          </div>
+
+          {validation.errors.length > 0 ? (
+            <div className="attention-list">
+              {validation.errors.map((error) => (
+                <article key={error} className="attention-item">
+                  <div className="attention-item__top">
+                    <h3>Validation error</h3>
+                    <StatusBadge label="critical" tone="critical" />
+                  </div>
+                  <p>{error}</p>
                 </article>
               ))}
             </div>
-          </div>
+          ) : (
+            <div className="prototype-note">
+              The current pack passes `distill-validate` and stays within the active token budget.
+            </div>
+          )}
         </section>
       </div>
 
@@ -97,15 +115,17 @@ export function OverviewPage() {
         <section className="panel">
           <div className="panel__header">
             <div>
-              <span className="mono-kicker">review pressure</span>
-              <h2>Attention required</h2>
-              <p>Operational gaps that matter before the next pack is trusted.</p>
+              <span className="mono-kicker">current signals</span>
+              <h2>Observed gaps and cautions</h2>
+              <p>
+                These notices are derived from the actual snapshot, not from
+                hand-written mock copy.
+              </p>
             </div>
-            <StatusBadge label="Needs review" tone="warn" />
           </div>
 
           <div className="attention-list">
-            {attentionItems.map((item) => (
+            {alerts.map((item) => (
               <article key={item.title} className="attention-item">
                 <div className="attention-item__top">
                   <h3>{item.title}</h3>
@@ -121,10 +141,12 @@ export function OverviewPage() {
           <div className="panel__header">
             <div>
               <span className="mono-kicker">source health</span>
-              <h2>Ingest window health</h2>
-              <p>How stable the current source window looks across each upstream system.</p>
+              <h2>Current ingest coverage</h2>
+              <p>
+                Global source counts stay visible while the selected role focuses
+                the rest of the shell.
+              </p>
             </div>
-            <StatusBadge label="Updated today" tone="ok" />
           </div>
 
           <div className="source-health">
@@ -135,9 +157,10 @@ export function OverviewPage() {
                     <h3>{item.source}</h3>
                     <p>{item.note}</p>
                   </div>
-                  <StatusBadge label={item.freshness} tone={item.tone} />
+                  <StatusBadge label={item.tone} tone={item.tone} />
                 </div>
                 <div className="source-health__value">{item.items}</div>
+                <p>{item.freshness}</p>
               </article>
             ))}
           </div>
@@ -148,19 +171,47 @@ export function OverviewPage() {
         <section className="panel">
           <div className="panel__header">
             <div>
-              <span className="mono-kicker">pack stance</span>
-              <h2>Current operating defaults</h2>
-              <p>The shell should keep the accepted baseline visible while the pack system evolves.</p>
+              <span className="mono-kicker">pack output</span>
+              <h2>Generated modules</h2>
+              <p>
+                This section only reflects files that actually exist under
+                `packs/&lt;role&gt;/v0.1/`.
+              </p>
             </div>
-            <StatusBadge label="Accepted baseline" tone="info" />
+            <StatusBadge
+              label={packSummary.available ? 'Pack found' : 'Pack missing'}
+              tone={packSummary.available ? 'ok' : 'critical'}
+            />
           </div>
 
           <div className="facts-grid">
-            {packDefaults.map((item) => (
-              <article key={item.label} className="fact-tile">
-                <span className="fact-tile__label">{item.label}</span>
-                <span className="fact-tile__value">{item.value}</span>
-              </article>
+            <article className="fact-tile">
+              <span className="fact-tile__label">Version</span>
+              <span className="fact-tile__value">{packSummary.version}</span>
+            </article>
+            <article className="fact-tile">
+              <span className="fact-tile__label">Language</span>
+              <span className="fact-tile__value">{packSummary.language || 'Unknown'}</span>
+            </article>
+            <article className="fact-tile">
+              <span className="fact-tile__label">Modules generated</span>
+              <span className="fact-tile__value">
+                {String(packSummary.modulesGenerated)}
+              </span>
+            </article>
+            <article className="fact-tile">
+              <span className="fact-tile__label">Source window</span>
+              <span className="fact-tile__value">
+                {packSummary.sourceWindow || 'Unknown'}
+              </span>
+            </article>
+          </div>
+
+          <div className="cluster-summary">
+            {packSummary.moduleNames.map((moduleName) => (
+              <span key={moduleName} className="chip">
+                {moduleName}
+              </span>
             ))}
           </div>
         </section>
@@ -168,18 +219,42 @@ export function OverviewPage() {
         <section className="panel">
           <div className="panel__header">
             <div>
-              <span className="mono-kicker">activity</span>
-              <h2>Recent changes</h2>
-              <p>Short operational deltas that deserve surface area in the control plane.</p>
+              <span className="mono-kicker">generation filter</span>
+              <h2>Pack provenance signals</h2>
+              <p>
+                Contributor counts and filtered-in artifacts come from the
+                generated `pack.yaml`.
+              </p>
             </div>
           </div>
 
-          <div className="activity-list">
-            {activityFeed.map((item) => (
-              <article key={item} className="activity-item">
-                {item}
-              </article>
-            ))}
+          <div className="facts-grid">
+            <article className="fact-tile">
+              <span className="fact-tile__label">Source artifacts</span>
+              <span className="fact-tile__value">{String(packSummary.sourceArtifacts)}</span>
+            </article>
+            <article className="fact-tile">
+              <span className="fact-tile__label">Filtered in</span>
+              <span className="fact-tile__value">{String(packSummary.filteredIn)}</span>
+            </article>
+            <article className="fact-tile">
+              <span className="fact-tile__label">Filtered out</span>
+              <span className="fact-tile__value">{String(packSummary.filteredOut)}</span>
+            </article>
+            <article className="fact-tile">
+              <span className="fact-tile__label">Contributors</span>
+              <span className="fact-tile__value">{String(packSummary.contributors)}</span>
+            </article>
+            <article className="fact-tile">
+              <span className="fact-tile__label">Generated at</span>
+              <span className="fact-tile__value">
+                {packSummary.generatedAt || 'Unknown'}
+              </span>
+            </article>
+            <article className="fact-tile">
+              <span className="fact-tile__label">LLM model</span>
+              <span className="fact-tile__value">{packSummary.llmModel || 'Unknown'}</span>
+            </article>
           </div>
         </section>
       </div>

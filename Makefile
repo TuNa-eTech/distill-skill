@@ -5,7 +5,7 @@ WINDOW ?= $(shell python -c "from datetime import date; start = date(2026, 1, 1)
 BIN = .venv/bin
 WEB_DIR = apps/web
 
-.PHONY: setup init-db ingest link score extract cluster synthesize validate all trace clean web-install web-dev web-build
+.PHONY: setup init-db ingest link score extract cluster synthesize validate all trace clean web-install web-api web-dev web-build
 
 define RUN_INGEST
 	@if $(BIN)/$(1) --help 2>&1 | grep -q -- "--since"; then \
@@ -60,6 +60,9 @@ clean:
 
 web-install:
 	cd $(WEB_DIR) && yarn install
+
+web-api:
+	$(BIN)/distill-web-serve
 
 web-dev:
 	cd $(WEB_DIR) && yarn dev
